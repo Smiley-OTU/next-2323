@@ -23,6 +23,7 @@ enum
 	ANIM_RIGHT,
 };
 //------------------------------------------------------------------------
+constexpr vec3 CENTER{ APP_VIRTUAL_WIDTH * 0.5f, APP_VIRTUAL_HEIGHT * 0.5f };
 PhysicsWorld world;
 
 //------------------------------------------------------------------------
@@ -42,7 +43,22 @@ void Init()
 	testSprite->SetScale(1.0f);
 	//------------------------------------------------------------------------
 
+	Particle circle;
+	circle.collider.shape = CIRCLE;
+	circle.collider.radius = 25.0f;
+	circle.collider.dynamic = true;
 
+	circle.pos = CENTER;
+
+	Particle plane;
+	plane.collider.shape = PLANE;
+	plane.collider.normal = vec3{ 0.0f, 1.0f, 0.0f };
+
+	plane.gravityScale = 0.0f;
+	plane.invMass = 0.0f;
+
+	world.particles.push_back(circle);
+	world.particles.push_back(plane);
 }
 
 //------------------------------------------------------------------------
@@ -113,6 +129,8 @@ void Update(float deltaTime)
 	{
 		App::PlaySound(".\\TestData\\Test.wav");
 	}
+
+	world.Update(deltaTime / 1000.0f);
 }
 
 //------------------------------------------------------------------------
@@ -127,12 +145,10 @@ void Render()
 	testSprite->Draw();
 	//------------------------------------------------------------------------
 
-	vec3 center{ APP_VIRTUAL_WIDTH * 0.5f, APP_VIRTUAL_HEIGHT * 0.5f };
-	DrawCircle(center, 50.0f, { 1.0f, 0.0f, 0.0f });
-
 	//------------------------------------------------------------------------
 	// Example Text.
 	//------------------------------------------------------------------------
+	
 	App::Print(100, 100, "Sample Text");
 
 	//------------------------------------------------------------------------
@@ -154,6 +170,8 @@ void Render()
 		b = (float)i / 20.0f;
 		App::DrawLine(sx, sy, ex, ey,r,g,b);
 	}
+
+	world.Render();
 }
 //------------------------------------------------------------------------
 // Add your shutdown code here. Called when the APP_QUIT_KEY is pressed.

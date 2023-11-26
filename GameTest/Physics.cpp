@@ -1,16 +1,17 @@
 #include "Physics.h"
+#include "Graphics.h"
 
-void PhysicsWorld::Step(float dt)
+void PhysicsWorld::Update(float dt)
 {
     while (prevTime < currTime)
     {
         prevTime += timestep;
-        Simulate(timestep);
+        Step(timestep);
     }
     currTime += dt;
 }
 
-void PhysicsWorld::Simulate(float dt)
+void PhysicsWorld::Step(float dt)
 {
     for (size_t i = 0; i < particles.size(); i++)
     {
@@ -31,5 +32,21 @@ void PhysicsWorld::Simulate(float dt)
     {
         ResolveVelocity(collision);
         ResolvePosition(collision);
+    }
+}
+
+void PhysicsWorld::Render()
+{
+    for (const Particle& p : particles)
+    {
+        switch (p.collider.shape)
+        {
+        case CIRCLE:
+            DrawCircle(p.pos, p.collider.radius, { 1.0f, 0.0f, 0.f });
+            break;
+
+        case PLANE:
+            break;
+        }
     }
 }

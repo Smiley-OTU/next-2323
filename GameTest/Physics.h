@@ -5,7 +5,9 @@
 class PhysicsWorld
 {
 public:
-    void Step(float dt);
+    void Update(float dt);
+    void Render();
+
 	float timestep = 1.0f / 50.0f;
 	vec3 gravity = { 0.0f, -9.8f, 0.0f };
 
@@ -17,5 +19,5 @@ private:
     float prevTime = 0.0f;
     float currTime = 0.0f;
 
-    void Simulate(float dt);
+    void Step(float dt);
 };

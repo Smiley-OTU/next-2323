@@ -95,9 +95,11 @@ inline std::vector<Manifold> HitTest(const std::vector<Particle>& particles)
                     manifold.a = (Particle*)&b, manifold.b = (Particle*)&a;
                 }
                 else
+                {
                     manifold.a = (Particle*)&a, manifold.b = (Particle*)&b;
+                }
+                collisions.push_back(manifold);
             }
-            collisions.push_back(manifold);
         }
     }
     return collisions;

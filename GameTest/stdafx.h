@@ -11,6 +11,7 @@
 #include <tchar.h>
 
 // Not sure if I'll use PCH since I like header-only
+#include <string>
 #include <vector>
 #include <unordered_map>
 
