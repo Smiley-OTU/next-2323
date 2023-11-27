@@ -51,12 +51,6 @@
     <ClInclude Include="stb_image\stb_image.h">
       <Filter>stb_image</Filter>
     </ClInclude>
-    <ClInclude Include="Entity.h">
-      <Filter>Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="Math.h">
-      <Filter>Engine</Filter>
-    </ClInclude>
     <ClInclude Include="Physics.h">
       <Filter>Engine</Filter>
     </ClInclude>
@@ -64,9 +58,6 @@
       <Filter>Engine</Filter>
     </ClInclude>
     <ClInclude Include="Collision.h">
-      <Filter>Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="Vec2.h">
       <Filter>Engine</Filter>
     </ClInclude>
     <ClInclude Include="Graphics.h">
