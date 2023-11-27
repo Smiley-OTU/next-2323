@@ -14,44 +14,24 @@ struct vec2
 
 constexpr vec2 v2zero = { 0.0f, 0.0f };
 
-inline vec2 Add(const vec2& a, const vec2& b)
+inline vec2 operator+(const vec2& a, const vec2& b)
 {
 	return { a.x + b.x, a.y + b.y };
 }
 
-inline vec2 Sub(const vec2& a, const vec2& b)
+inline vec2 operator-(const vec2& a, const vec2& b)
 {
 	return { a.x - b.x, a.y - b.y };
 }
 
-inline vec2 Mul(const vec2& a, float b)
+inline vec2 operator*(const vec2& a, float b)
 {
 	return { a.x * b, a.y * b };
 }
 
-inline vec2 Div(const vec2& a, float b)
-{
-	return { a.x / b, a.y / b };
-}
-
-inline vec2 operator+(const vec2& a, const vec2& b)
-{
-	return Add(a, b);
-}
-
-inline vec2 operator-(const vec2& a, const vec2& b)
-{
-	return Sub(a, b);
-}
-
-inline vec2 operator*(const vec2& a, float b)
-{
-	return Mul(a, b);
-}
-
 inline vec2 operator/(const vec2& a, float b)
 {
-	return Div(a, b);
+	return { a.x / b, a.y / b };
 }
 
 inline float Length(const vec2& v)
