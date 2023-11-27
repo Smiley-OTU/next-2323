@@ -10,12 +10,12 @@ enum Shape
 
 struct Collider
 {
-    Shape shape = CIRCLE;
     union
     {
         vec3 normal{};
         float radius;
     };
+    Shape shape = CIRCLE;
     bool dynamic = false;
 };
 
@@ -107,8 +107,30 @@ inline std::vector<Manifold> HitTest(const std::vector<Particle>& particles)
 
 inline void ResolveVelocity(Manifold collision)
 {
+    // e = restitution, j = impulse, jt = tangent impulse (friciton), mu = friction coefficient
     Particle& a = *collision.a;
     Particle& b = *collision.b;
+
+    // Exit if objects are separating or both have infinite masses
+    vec3 normal = Normalize(collision.mtv);
+    vec3 velBA = a.vel - b.vel;
+    float t = Dot(velBA, normal);
+    if (t > 0.0f) return;
+    if ((a.invMass + b.invMass) <= FLT_MIN) return;
+
+    // Restitution
+    float e = fminf(a.restitution, b.restitution);
+    float j = -(1.0f + e) * t / (a.invMass + b.invMass);
+    a.vel = a.vel + normal * j * a.invMass;
+    b.vel = b.vel - normal * j * b.invMass;
+
+    // Friction
+    vec3 tangent = Normalize(velBA - (normal * t));
+    float jt = Dot(velBA, tangent) / (a.invMass + b.invMass);
+    float mu = sqrtf(a.friction * b.friction);
+    jt = fmaxf(-j * mu, fminf(jt, j * mu));
+    a.vel = a.vel + tangent * jt * a.invMass;
+    b.vel = b.vel + tangent * jt * b.invMass;
 }
 
 inline void ResolvePosition(Manifold collision)

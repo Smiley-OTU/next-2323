@@ -26,6 +26,7 @@ enum
 constexpr vec3 CENTER{ APP_VIRTUAL_WIDTH * 0.5f, APP_VIRTUAL_HEIGHT * 0.5f };
 
 // TODO -- turn this into brick break with students!
+// (Note that this is in screen-space instead of world-space, so motion appears different!)
 PhysicsWorld world;
 
 //------------------------------------------------------------------------
@@ -45,12 +46,24 @@ void Init()
 	testSprite->SetScale(1.0f);
 	//------------------------------------------------------------------------
 
-	Particle circle;
-	circle.collider.shape = CIRCLE;
-	circle.collider.radius = 25.0f;
-	circle.collider.dynamic = true;
+	Particle circle1;
+	circle1.collider.shape = CIRCLE;
+	circle1.collider.radius = 25.0f;
+	circle1.collider.dynamic = true;
 
-	circle.pos = CENTER;
+	circle1.pos = CENTER;
+	circle1.friction = 0.5f;
+	circle1.restitution = 0.5f;
+
+	Particle circle2;
+	circle2.collider.shape = CIRCLE;
+	circle2.collider.radius = 25.0f;
+	circle2.collider.dynamic = true;
+
+	circle2.pos = v3zero;
+	circle2.vel = { 25.0f, 0.0f, 0.0f };
+	circle2.friction = 0.5f;
+	circle2.restitution = 0.5f;
 
 	Particle plane;
 	plane.collider.shape = PLANE;
@@ -58,8 +71,11 @@ void Init()
 
 	plane.gravityScale = 0.0f;
 	plane.invMass = 0.0f;
+	plane.friction = 1.0f;
+	plane.restitution = 1.0f;
 
-	world.particles.push_back(circle);
+	world.particles.push_back(circle1);
+	world.particles.push_back(circle2);
 	world.particles.push_back(plane);
 }
 
