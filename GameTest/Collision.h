@@ -1,5 +1,5 @@
 #pragma once
-#include "Vec3.h"
+#include "Math.h"
 #include <vector>
 
 enum Shape
@@ -12,7 +12,7 @@ struct Collider
 {
     union
     {
-        vec3 normal{};
+        vec2 normal{};
         float radius;
     };
     Shape shape = CIRCLE;
@@ -21,10 +21,10 @@ struct Collider
 
 struct Particle
 {
-    vec3 pos;
-    vec3 vel;
-    vec3 acc;
-    vec3 force;
+    vec2 pos;
+    vec2 vel;
+    vec2 acc;
+    vec2 force;
 
     float gravityScale = 1.0f;
     float invMass = 1.0f;
@@ -38,13 +38,13 @@ struct Manifold
 {
     Particle* a = nullptr;
     Particle* b = nullptr;
-    vec3 mtv{};
+    vec2 mtv{};
 };
 
 // mtv points from 2 to 1
-inline bool SphereSphere(vec3 pos1, float radius1, vec3 pos2, float radius2, vec3* mtv = nullptr)
+inline bool SphereSphere(vec2 pos1, float radius1, vec2 pos2, float radius2, vec2* mtv = nullptr)
 {
-    vec3 direction = pos1 - pos2;
+    vec2 direction = pos1 - pos2;
     float distance = Length(direction);
     float radiiSum = radius1 + radius2;
     bool collision = distance <= radiiSum;
@@ -54,7 +54,7 @@ inline bool SphereSphere(vec3 pos1, float radius1, vec3 pos2, float radius2, vec
 }
 
 // mtv points from plane to sphere
-inline bool SpherePlane(vec3 circle, float radius, vec3 plane, vec3 normal, vec3* mtv = nullptr)
+inline bool SpherePlane(vec2 circle, float radius, vec2 plane, vec2 normal, vec2* mtv = nullptr)
 {
     float distance = Dot(circle - plane, normal);
     bool collision = distance <= radius;
@@ -63,7 +63,7 @@ inline bool SpherePlane(vec3 circle, float radius, vec3 plane, vec3 normal, vec3
     return collision;
 }
 
-inline bool HitTest(vec3 pos1, vec3 pos2, Collider col1, Collider col2, vec3* mtv = nullptr)
+inline bool HitTest(vec2 pos1, vec2 pos2, Collider col1, Collider col2, vec2* mtv = nullptr)
 {
     if (col1.shape == CIRCLE && col2.shape == CIRCLE)
         return SphereSphere(pos1, col1.radius, pos2, col2.radius, mtv);
@@ -112,8 +112,8 @@ inline void ResolveVelocity(Manifold collision)
     Particle& b = *collision.b;
 
     // Exit if objects are separating or both have infinite masses
-    vec3 normal = Normalize(collision.mtv);
-    vec3 velBA = a.vel - b.vel;
+    vec2 normal = Normalize(collision.mtv);
+    vec2 velBA = a.vel - b.vel;
     float t = Dot(velBA, normal);
     if (t > 0.0f) return;
     if ((a.invMass + b.invMass) <= FLT_MIN) return;
@@ -125,7 +125,7 @@ inline void ResolveVelocity(Manifold collision)
     b.vel = b.vel - normal * j * b.invMass;
 
     // Friction
-    vec3 tangent = Normalize(velBA - (normal * t));
+    vec2 tangent = Normalize(velBA - (normal * t));
     float jt = Dot(velBA, tangent) / (a.invMass + b.invMass);
     float mu = sqrtf(a.friction * b.friction);
     jt = fmaxf(-j * mu, fminf(jt, j * mu));

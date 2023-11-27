@@ -54,7 +54,7 @@
     <ClInclude Include="Physics.h">
       <Filter>Engine</Filter>
     </ClInclude>
-    <ClInclude Include="Vec3.h">
+    <ClInclude Include="Math.h">
       <Filter>Engine</Filter>
     </ClInclude>
     <ClInclude Include="Collision.h">

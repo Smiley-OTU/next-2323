@@ -17,14 +17,14 @@ void PhysicsWorld::Step(float dt)
     {
         Particle& p = particles[i];
 
-        vec3 fa = p.force * p.invMass;
-        vec3 fg = gravity * p.gravityScale;
+        vec2 fa = p.force * p.invMass;
+        vec2 fg = gravity * p.gravityScale;
         p.acc = fa + fg;
 
         p.vel = p.vel + p.acc * dt;
         p.pos = p.pos + p.vel * dt;
 
-        p.force = v3zero;
+        p.force = v2zero;
     }
 
     mCollisions = HitTest(particles);
@@ -50,7 +50,7 @@ void PhysicsWorld::Render()
     
     for (size_t i = 0; i < particles.size(); i++)
     {
-        vec3 color = collisions[i] ? vec3{ 1.0f, 0.0f, 0.0f } : vec3{ 0.0f, 1.0f, 0.0f };
+        Color color = collisions[i] ? Color{ 1.0f, 0.0f, 0.0f } : Color{ 0.0f, 1.0f, 0.0f };
         const Particle& p = particles[i];
         switch (p.collider.shape)
         {

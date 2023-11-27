@@ -9,7 +9,7 @@ public:
     void Render();
 
 	float timestep = 1.0f / 50.0f;
-	vec3 gravity = { 0.0f, -9.8f, 0.0f };
+	vec2 gravity = { 0.0f, -9.8f };
 
     std::vector<Particle> particles;
     const std::vector<Manifold>& Collisions() { return mCollisions; }

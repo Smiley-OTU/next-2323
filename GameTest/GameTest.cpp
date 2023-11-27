@@ -12,7 +12,7 @@
 #include "Graphics.h"
 
 // (Note that this is in screen-space instead of world-space, so motion appears different)
-constexpr vec3 CENTER{ APP_VIRTUAL_WIDTH * 0.5f, APP_VIRTUAL_HEIGHT * 0.5f };
+constexpr vec2 CENTER{ APP_VIRTUAL_WIDTH * 0.5f, APP_VIRTUAL_HEIGHT * 0.5f };
 
 // TODO -- turn this into brick break with students?
 // TODO -- make an ECS? Physics is a solved problems... Now we need a video game!!!
@@ -34,14 +34,14 @@ void Init()
 	circle2.collider.radius = 25.0f;
 	circle2.collider.dynamic = true;
 
-	circle2.pos = v3zero;
-	circle2.vel = { 25.0f, 0.0f, 0.0f };
+	circle2.pos = v2zero;
+	circle2.vel = { 25.0f, 0.0f };
 	circle2.friction = 0.5f;
 	circle2.restitution = 0.5f;
 
 	Particle plane;
 	plane.collider.shape = PLANE;
-	plane.collider.normal = vec3{ 0.0f, 1.0f, 0.0f };
+	plane.collider.normal = vec2{ 0.0f, 1.0f };
 
 	plane.gravityScale = 0.0f;
 	plane.invMass = 0.0f;
