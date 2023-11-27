@@ -51,6 +51,16 @@ void Init()
 	world.particles.push_back(circle1);
 	world.particles.push_back(circle2);
 	world.particles.push_back(plane);
+
+	//glMatrixMode(GL_PROJECTION);
+	//glOrtho(0.0f, APP_VIRTUAL_WIDTH, 0.0f, APP_VIRTUAL_HEIGHT, -100.0f, 100.0f);
+	//
+	//Vector3 eye{ CENTER.x, CENTER.y, 50.0f };
+	//Vector3 target{ 0.0f, 0.0f, 0.0f };
+	//Vector3 up{ 0.0f, 1.0f, 0.0f };
+	//Matrix view = MatrixLookAt(eye, target, up);
+	//glMatrixMode(GL_MODELVIEW);
+	//glMultMatrixf((float*)&view);
 }
 
 void Update(float deltaTime)
@@ -65,6 +75,12 @@ void Render()
 	// White background
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	world.Render();
+
+	// TODO -- use actual world-screen pipeline for matrix stack
+	// (Currently, this API does screen to NDC conversion before drawing)
+	// (Pre-multiplication, so translate * scale will scale then translate)
+	//DrawCircleNDC();
+	//DrawCircleWorld(CENTER, 50.0f);
 }
 
 void Shutdown()

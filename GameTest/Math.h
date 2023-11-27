@@ -60,9 +60,29 @@ inline vec2 Project(const vec2& a, const vec2& b)
 	return b * (Dot(a, b) / LengthSqr(b));
 }
 
+// Speculative functions
+// Lerp is always good, clamp is only used once in ResolveVelocity
+// Rotate will be needed to transform CPU vertices if I want capsules
+// (I can use glTranslate, glRotate and glScale for GPU transformations)
+/*
+inline float Clamp(float value, float min, float max)
+{
+	return fmaxf(max, fminf(value, min));
+}
+
+inline float Lerp(float a, float b, float t)
+{
+	return a * (1.0f - t) + b * t;
+}
+
+inline vec2 Lerp(vec2 a, vec2 b, float t)
+{
+	return a * (1.0f - t) + b * t;
+}
+
 inline vec2 Rotate(vec2 v, float radians)
 {
 	float c = cosf(radians);
 	float s = sinf(radians);
 	return { v.x * c - v.y * s, v.x * s + v.y * c };
-}
+}*/
