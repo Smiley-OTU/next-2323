@@ -10,7 +10,7 @@ enum Shape
 
 struct Collider
 {
-    Shape shape;
+    Shape shape = CIRCLE;
     union
     {
         vec3 normal{};

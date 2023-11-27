@@ -24,6 +24,8 @@ enum
 };
 //------------------------------------------------------------------------
 constexpr vec3 CENTER{ APP_VIRTUAL_WIDTH * 0.5f, APP_VIRTUAL_HEIGHT * 0.5f };
+
+// TODO -- turn this into brick break with students!
 PhysicsWorld world;
 
 //------------------------------------------------------------------------
@@ -130,7 +132,9 @@ void Update(float deltaTime)
 		App::PlaySound(".\\TestData\\Test.wav");
 	}
 
-	world.Update(deltaTime / 1000.0f);
+	// Time in seconds (instead of milliseconds)
+	float dt = deltaTime / 1000.0f;
+	world.Update(dt);
 }
 
 //------------------------------------------------------------------------

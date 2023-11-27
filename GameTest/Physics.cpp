@@ -37,12 +37,25 @@ void PhysicsWorld::Step(float dt)
 
 void PhysicsWorld::Render()
 {
-    for (const Particle& p : particles)
+    std::vector<bool> collisions(particles.size());
+    for (size_t i = 0; i < particles.size(); i++)
     {
+        for (size_t j = i + 1; j < particles.size(); j++)
+        {
+            const Particle& a = particles[i];
+            const Particle& b = particles[j];
+            collisions[i] = collisions[i] || HitTest(a.pos, b.pos, a.collider, b.collider);
+        }
+    }
+    
+    for (size_t i = 0; i < particles.size(); i++)
+    {
+        vec3 color = collisions[i] ? vec3{ 1.0f, 0.0f, 0.0f } : vec3{ 0.0f, 1.0f, 0.0f };
+        const Particle& p = particles[i];
         switch (p.collider.shape)
         {
         case CIRCLE:
-            DrawCircle(p.pos, p.collider.radius, { 1.0f, 0.0f, 0.f });
+            DrawCircle(p.pos, p.collider.radius, color);
             break;
 
         case PLANE:
