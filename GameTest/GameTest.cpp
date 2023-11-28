@@ -11,6 +11,10 @@
 #include "Physics.h"
 #include "Graphics.h"
 
+#undef near
+#undef far
+#include "Math2.h"
+
 // (Note that this is in screen-space instead of world-space, so motion appears different)
 constexpr vec2 CENTER{ APP_VIRTUAL_WIDTH * 0.5f, APP_VIRTUAL_HEIGHT * 0.5f };
 
@@ -52,21 +56,21 @@ void Init()
 	world.particles.push_back(circle2);
 	world.particles.push_back(plane);
 
-	//glMatrixMode(GL_PROJECTION);
-	//glOrtho(0.0f, APP_VIRTUAL_WIDTH, 0.0f, APP_VIRTUAL_HEIGHT, -100.0f, 100.0f);
-	//
-	//Vector3 eye{ CENTER.x, CENTER.y, 50.0f };
-	//Vector3 target{ 0.0f, 0.0f, 0.0f };
-	//Vector3 up{ 0.0f, 1.0f, 0.0f };
-	//Matrix view = MatrixLookAt(eye, target, up);
-	//glMatrixMode(GL_MODELVIEW);
-	//glMultMatrixf((float*)&view);
+	glMatrixMode(GL_PROJECTION);
+	glOrtho(-100.0f, 100.0f, -100.0f, 100.0f, -1.0f, 1.0f);
+
+	Vector3 eye{ 0.0f, 0.0f, 0.5f };
+	Vector3 target{ 0.0f, 0.0f, 0.0f };
+	Vector3 up{ 0.0f, 1.0f, 0.0f };
+	Matrix view = Transpose(LookAt(eye, target, up));
+
+	glMatrixMode(GL_MODELVIEW);
+	glMultMatrixf((float*)&view);
 }
 
-void Update(float deltaTime)
+void Update(float dt)
 {
-	// Time in seconds
-	float dt = deltaTime / 1000.0f;
+	dt /= 1000.0f;
 	world.Update(dt);
 }
 
@@ -74,8 +78,9 @@ void Render()
 {
 	// White background
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	world.Render();
+	//world.Render();
 
+	DrawCircleWorld({}, 25.0f);
 	// TODO -- use actual world-screen pipeline for matrix stack
 	// (Currently, this API does screen to NDC conversion before drawing)
 	// (Pre-multiplication, so translate * scale will scale then translate)

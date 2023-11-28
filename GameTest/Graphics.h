@@ -54,11 +54,9 @@ inline void DrawCircleNDC(float radius = 1.0f)
 inline void DrawCircleWorld(vec2 pos, float radius = 0.5f)
 {
 	glMatrixMode(GL_MODELVIEW);
-
 	glPushMatrix();
 	glTranslatef(pos.x, pos.y, 0.0f);
-	float s = radius * 2.0f;
-	glScalef(s, s, 1.0f);
+	glScalef(radius, radius, 1.0f);
 	glColor3f(1.0f, 0.0f, 0.0f);
 
 	glBegin(GL_LINE_LOOP);
