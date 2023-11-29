@@ -125,10 +125,10 @@ inline void ResolveVelocity(Manifold collision)
     b.vel = b.vel - normal * j * b.invMass;
 
     // Friction
-    vec2 tangent = Normalize(velBA - (normal * t));
-    float jt = Dot(velBA, tangent) / (a.invMass + b.invMass);
+    vec2 tangent = Normalize(velBA - normal * t);
+    float jt = -Dot(velBA, tangent) / (a.invMass + b.invMass);
     float mu = sqrtf(a.friction * b.friction);
-    jt = fmaxf(j * mu, fminf(jt, -j * mu));
+    jt = Clamp(jt, -j * mu, j * mu);
     a.vel = a.vel + tangent * jt * a.invMass;
     b.vel = b.vel + tangent * jt * b.invMass;
 }

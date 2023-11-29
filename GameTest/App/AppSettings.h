@@ -50,7 +50,7 @@
 #define APP_PAD_EMUL_BUTTON_RIGHT_SHOULDER	('4')
 
 #ifdef _DEBUG
-#define APP_RENDER_UPDATE_TIMES				true
+#define APP_RENDER_UPDATE_TIMES				false
 #else
 #define APP_RENDER_UPDATE_TIMES				false
 #endif
