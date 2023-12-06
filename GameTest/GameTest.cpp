@@ -59,8 +59,8 @@ void Init()
 	circle2.friction = 0.0f;
 	circle2.restitution = 1.0f;
 
-	//world.particles.push_back(circle1);
-	//world.particles.push_back(circle2);
+	world.particles.push_back(circle1);
+	world.particles.push_back(circle2);
 
 	//Particle circle;
 	//circle.collider.shape = CIRCLE;
@@ -131,18 +131,24 @@ void Update(float dt)
 		direction.y += 1.0f;
 	player->vel = direction * speed;
 
-	vec2 rec = player->pos - player->collider.extents;
-	float w = player->collider.extents.x * 2.0f;
-	float h = player->collider.extents.y * 2.0f;
-	color = CircleRect2(circle.pos.x, circle.pos.y, circle.collider.radius, rec.x, rec.y, w, h, nullptr)
+	//vec2 rec = player->pos - player->collider.extents;
+	//float w = player->collider.extents.x * 2.0f;
+	//float h = player->collider.extents.y * 2.0f;
+	//color = CircleRect2(circle.pos.x, circle.pos.y, circle.collider.radius, rec.x, rec.y, w, h)
+	//	? Color{ 1.0f, 0.0f, 0.0f } : Color{ 0.0f, 1.0f, 0.0f };
+
+	vec2 mtv{};
+	color = CircleRect2(circle.pos, circle.collider.radius, player->pos, player->collider.extents, &mtv)
 		? Color{ 1.0f, 0.0f, 0.0f } : Color{ 0.0f, 1.0f, 0.0f };
+
+	circle.pos = circle.pos + mtv;
 }
 
 void Render()
 {
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	//world.Render();
-	DrawCircle(circle.pos, circle.collider.radius, color);
+	world.Render();
+	//DrawCircle(circle.pos, circle.collider.radius, color);
 	DrawRect(player->pos, playerWidth, playerHeight, { 1.0f, 0.0f, 0.0f }, true);
 }
 

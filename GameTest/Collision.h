@@ -75,8 +75,8 @@ inline bool CircleCircle(vec2 pos1, float radius1, vec2 pos2, float radius2, vec
 //    return collision;
 //}
 
-inline bool CircleRect2(float cx, float cy, float radius, float rx, float ry, float rw, float rh, vec2* mtv = nullptr) {
-
+inline bool CircleRect2(float cx, float cy, float radius, float rx, float ry, float rw, float rh, vec2* mtv = nullptr)
+{
     // temporary variables to set edges for testing
     float testX = cx;
     float testY = cy;
@@ -91,14 +91,26 @@ inline bool CircleRect2(float cx, float cy, float radius, float rx, float ry, fl
     float distX = cx - testX;
     float distY = cy - testY;
     float distance = sqrt((distX * distX) + (distY * distY));
+    return distance <= radius;
+}
 
-    // if the distance is less than the radius, collision!
+inline bool CircleRect2(vec2 circle, float radius, vec2 rect, vec2 extents, vec2* mtv = nullptr)
+{
+    vec2 test = circle;
+    float xMin = rect.x - extents.x;
+    float xMax = rect.x + extents.x;
+    float yMin = rect.y - extents.y;
+    float yMax = rect.y + extents.y;
+
+    if (circle.x < xMin) test.x = xMin;
+    else if (circle.x > xMax) test.x = xMax;
+    if (circle.y < yMin) test.y = yMin;
+    else if (circle.y > yMax) test.y = yMax;
+
+    float distance = Length(circle - test);
     bool collision = distance <= radius;
-    if (collision && mtv != nullptr) {
-        // Calculate rectangle centre
-        vec2 c = { rx + rw * 0.5f, ry + rh * 0.5f };
-        *mtv = Normalize(vec2{ cx, cy } - c) * (radius - distance);
-    }
+    if (collision && mtv != nullptr)
+        *mtv = Normalize(circle - rect) * (radius - distance);
     return collision;
 }
 
@@ -124,14 +136,14 @@ inline bool HitTest(vec2 pos1, vec2 pos2, Collider col1, Collider col2, vec2* mt
         return CirclePlane(pos2, col2.radius, pos1, col1.normal, mtv);
 
     if (col1.shape == CIRCLE && col2.shape == AABB)
-        //return CircleRect(pos1, col1.radius, pos2, col2.extents, mtv);
-        return CircleRect2(pos1.x, pos1.y, col1.radius, pos2.x - col2.extents.x, pos2.y - col2.extents.y,
-            col2.extents.x * 2.0f, col2.extents.y * 2.0f, mtv);
+        return CircleRect2(pos1, col1.radius, pos2, col2.extents, mtv);
+        //return CircleRect2(pos1.x, pos1.y, col1.radius, pos2.x - col2.extents.x, pos2.y - col2.extents.y,
+        //    col2.extents.x * 2.0f, col2.extents.y * 2.0f, mtv);
 
     if (col1.shape == AABB && col2.shape == CIRCLE)
-        //return CircleRect(pos2, col2.radius, pos1, col1.extents, mtv);
-        return CircleRect2(pos2.x, pos2.y, col2.radius, pos1.x - col1.extents.x, pos1.y - col1.extents.y,
-            col1.extents.x * 2.0f, col1.extents.y * 2.0f, mtv);
+        return CircleRect2(pos2, col2.radius, pos1, col1.extents, mtv);
+        //return CircleRect2(pos2.x, pos2.y, col2.radius, pos1.x - col1.extents.x, pos1.y - col1.extents.y,
+        //    col1.extents.x * 2.0f, col1.extents.y * 2.0f, mtv);
 
     return false;
 }
