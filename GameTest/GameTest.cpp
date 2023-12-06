@@ -14,6 +14,23 @@
 // TODO -- turn this into brick break with students?
 // TODO -- make an ECS? Physics is a solved problems... Now we need a video game!!!
 PhysicsWorld world;
+//Particle player;
+
+Particle CreateWall(vec2 position, vec2 normal)
+{
+	Particle plane;
+	plane.collider.shape = PLANE;
+	plane.collider.normal = normal;
+	plane.collider.dynamic = false;
+
+	plane.pos = position;
+	plane.gravityScale = 0.0f;
+	plane.invMass = 0.0f;
+	plane.friction = 1.0f;
+	plane.restitution = 1.0f;
+
+	return plane;
+}
 
 void Init()
 {
@@ -22,34 +39,28 @@ void Init()
 	circle1.collider.radius = 0.5f;
 	circle1.collider.dynamic = true;
 	
-	circle1.pos = { -1.0f, 5.0f };
-	circle1.vel = { -1.0f, 0.0f };
-	circle1.friction = 0.01f;
-	circle1.restitution = 0.75f;
+	circle1.pos = { 5.0f, 5.0f };
+	circle1.vel = { -5.0f, 0.0f };
+	circle1.friction = 0.0f;
+	circle1.restitution = 1.0f;
 
 	Particle circle2;
 	circle2.collider.shape = CIRCLE;
 	circle2.collider.radius = 0.5f;
 	circle2.collider.dynamic = true;
 
-	circle2.pos = { -3.0f, 0.5f };
-	circle2.vel = {  3.0f, 0.0f };
-	circle2.friction = 0.5f;
-	circle2.restitution = 0.5f;
-
-	Particle plane;
-	plane.collider.shape = PLANE;
-	plane.collider.normal = vec2{ 0.0f, 1.0f };
-
-	plane.pos = { 0.0f, -0.0f };
-	plane.gravityScale = 0.0f;
-	plane.invMass = 0.0f;
-	plane.friction = 1.0f;
-	plane.restitution = 1.0f;
+	circle2.pos = { -5.0f, -5.0f };
+	circle2.vel = {  5.0f, 0.0f };
+	circle2.friction = 0.0f;
+	circle2.restitution = 1.0f;
 
 	world.particles.push_back(circle1);
 	world.particles.push_back(circle2);
-	world.particles.push_back(plane);
+
+	world.particles.push_back(CreateWall({ 0.0f, 10.0f }, { 0.0f, -1.0f }));	// top
+	world.particles.push_back(CreateWall({ 0.0f, -10.0f }, { 0.0f, 1.0f }));	// bottom
+	world.particles.push_back(CreateWall({ -10.0f, 0.0f }, { 1.0f, 0.0f }));	// left
+	world.particles.push_back(CreateWall({ 10.0f, 0.0f }, { -1.0f, 0.0f }));	// right
 
 	glMatrixMode(GL_PROJECTION);
 	glOrtho(-10.0f, 10.0f, -10.0f, 10.0f, -1.0f, 1.0f);
