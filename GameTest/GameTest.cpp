@@ -14,7 +14,7 @@
 // TODO -- turn this into brick break with students?
 // TODO -- make an ECS? Physics is a solved problems... Now we need a video game!!!
 PhysicsWorld world;
-//Particle player;
+Particle* player;
 
 Particle CreateWall(vec2 position, vec2 normal)
 {
@@ -62,6 +62,15 @@ void Init()
 	world.particles.push_back(CreateWall({ -10.0f, 0.0f }, { 1.0f, 0.0f }));	// left
 	world.particles.push_back(CreateWall({ 10.0f, 0.0f }, { -1.0f, 0.0f }));	// right
 
+	// Hack so the player's memory address doesn't change
+	world.particles.push_back({});
+	player = &world.particles.back();
+	player->collider.shape = AABB;
+
+	player->pos = { 0.0f, -9.0f };
+	player->invMass = 0.0f;
+	player->gravityScale = 0.0f;
+
 	glMatrixMode(GL_PROJECTION);
 	glOrtho(-10.0f, 10.0f, -10.0f, 10.0f, -1.0f, 1.0f);
 
@@ -78,13 +87,21 @@ void Update(float dt)
 {
 	dt /= 1000.0f;
 	world.Update(dt);
+
+	const CController& controller = CSimpleControllers::GetInstance().GetController(0);
+	if (controller.GetLeftThumbStickX() < -0.5f)
+		player->vel = { -5.0f, 0.0f };
+	else if (controller.GetLeftThumbStickX() > 0.5f)
+		player->vel = { 5.0f, 0.0f };
+	else
+		player->vel = {};
 }
 
 void Render()
 {
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	world.Render();
-	DrawRect({ 0.0f, 0.0f }, 19.0f, 1.0f, { 1.0f, 0.0f, 0.0f }, true);
+	DrawRect(player->pos, 2.0, 1.0f, { 1.0f, 0.0f, 0.0f }, true);
 }
 
 void Shutdown()

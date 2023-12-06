@@ -5,7 +5,8 @@
 enum Shape
 {
     CIRCLE,
-    PLANE
+    PLANE,
+    AABB
 };
 
 struct Collider
