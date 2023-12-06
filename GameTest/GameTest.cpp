@@ -73,6 +73,7 @@ void Render()
 {
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	world.Render();
+	DrawRect({ 0.0f, 0.0f }, 19.0f, 1.0f, { 1.0f, 0.0f, 0.0f }, true);
 }
 
 void Shutdown()
