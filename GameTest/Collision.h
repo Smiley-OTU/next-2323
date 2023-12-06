@@ -14,6 +14,7 @@ struct Collider
     union
     {
         vec2 normal{};
+        vec2 extents;
         float radius;
     };
     Shape shape = CIRCLE;
@@ -43,7 +44,7 @@ struct Manifold
 };
 
 // mtv points from 2 to 1
-inline bool SphereSphere(vec2 pos1, float radius1, vec2 pos2, float radius2, vec2* mtv = nullptr)
+inline bool CircleCircle(vec2 pos1, float radius1, vec2 pos2, float radius2, vec2* mtv = nullptr)
 {
     vec2 direction = pos1 - pos2;
     float distance = Length(direction);
@@ -54,8 +55,55 @@ inline bool SphereSphere(vec2 pos1, float radius1, vec2 pos2, float radius2, vec
     return collision;
 }
 
+// TODO -- fix this and make it look nice
+// mtv points from box to circle
+//inline bool CircleRect(vec2 circleCenter, float radius, vec2 rectCenter, vec2 halfExtents, vec2* mtv = nullptr)
+//{
+//    vec2 nearest;
+//    // We need to change how these are calculated
+//    float xMin = rectCenter.x - halfExtents.x;
+//    float xMax = rectCenter.x + halfExtents.x;
+//    float yMin = rectCenter.y - halfExtents.y;
+//    float yMax = rectCenter.y + halfExtents.y;
+//    nearest.x = circleCenter.x < xMin ? xMin : xMax;
+//    nearest.y = circleCenter.y < yMin ? yMin : yMax;
+//
+//    float distance = Length(circleCenter - nearest);
+//    bool collision = distance <= radius;
+//    if (collision && mtv != nullptr)
+//        *mtv = Normalize(circleCenter - rectCenter) * (radius - distance);
+//    return collision;
+//}
+
+inline bool CircleRect2(float cx, float cy, float radius, float rx, float ry, float rw, float rh, vec2* mtv = nullptr) {
+
+    // temporary variables to set edges for testing
+    float testX = cx;
+    float testY = cy;
+
+    // which edge is closest?
+    if (cx < rx)         testX = rx;      // test left edge
+    else if (cx > rx + rw) testX = rx + rw;   // right edge
+    if (cy < ry)         testY = ry;      // top edge
+    else if (cy > ry + rh) testY = ry + rh;   // bottom edge
+
+    // get distance from closest edges
+    float distX = cx - testX;
+    float distY = cy - testY;
+    float distance = sqrt((distX * distX) + (distY * distY));
+
+    // if the distance is less than the radius, collision!
+    bool collision = distance <= radius;
+    if (collision && mtv != nullptr) {
+        // Calculate rectangle centre
+        vec2 c = { rx + rw * 0.5f, ry + rh * 0.5f };
+        *mtv = Normalize(vec2{ cx, cy } - c) * (radius - distance);
+    }
+    return collision;
+}
+
 // mtv points from plane to sphere
-inline bool SpherePlane(vec2 circle, float radius, vec2 plane, vec2 normal, vec2* mtv = nullptr)
+inline bool CirclePlane(vec2 circle, float radius, vec2 plane, vec2 normal, vec2* mtv = nullptr)
 {
     float distance = Dot(circle - plane, normal);
     bool collision = distance <= radius;
@@ -67,13 +115,23 @@ inline bool SpherePlane(vec2 circle, float radius, vec2 plane, vec2 normal, vec2
 inline bool HitTest(vec2 pos1, vec2 pos2, Collider col1, Collider col2, vec2* mtv = nullptr)
 {
     if (col1.shape == CIRCLE && col2.shape == CIRCLE)
-        return SphereSphere(pos1, col1.radius, pos2, col2.radius, mtv);
+        return CircleCircle(pos1, col1.radius, pos2, col2.radius, mtv);
 
     if (col1.shape == CIRCLE && col2.shape == PLANE)
-        return SpherePlane(pos1, col1.radius, pos2, col2.normal, mtv);
+        return CirclePlane(pos1, col1.radius, pos2, col2.normal, mtv);
 
     if (col1.shape == PLANE && col2.shape == CIRCLE)
-        return SpherePlane(pos2, col2.radius, pos1, col1.normal, mtv);
+        return CirclePlane(pos2, col2.radius, pos1, col1.normal, mtv);
+
+    if (col1.shape == CIRCLE && col2.shape == AABB)
+        //return CircleRect(pos1, col1.radius, pos2, col2.extents, mtv);
+        return CircleRect2(pos1.x, pos1.y, col1.radius, pos2.x - col2.extents.x, pos2.y - col2.extents.y,
+            col2.extents.x * 2.0f, col2.extents.y * 2.0f, mtv);
+
+    if (col1.shape == AABB && col2.shape == CIRCLE)
+        //return CircleRect(pos2, col2.radius, pos1, col1.extents, mtv);
+        return CircleRect2(pos2.x, pos2.y, col2.radius, pos1.x - col1.extents.x, pos1.y - col1.extents.y,
+            col1.extents.x * 2.0f, col1.extents.y * 2.0f, mtv);
 
     return false;
 }

@@ -15,6 +15,11 @@
 // TODO -- make an ECS? Physics is a solved problems... Now we need a video game!!!
 PhysicsWorld world;
 Particle* player;
+float playerWidth = 2.0f;
+float playerHeight = 1.0f;
+
+Particle circle;
+Color color;
 
 Particle CreateWall(vec2 position, vec2 normal)
 {
@@ -54,8 +59,30 @@ void Init()
 	circle2.friction = 0.0f;
 	circle2.restitution = 1.0f;
 
-	world.particles.push_back(circle1);
-	world.particles.push_back(circle2);
+	//world.particles.push_back(circle1);
+	//world.particles.push_back(circle2);
+
+	//Particle circle;
+	//circle.collider.shape = CIRCLE;
+	//circle.collider.radius = 0.5f;
+	//circle.collider.dynamic = true;
+	//
+	//circle.pos = { 0.0f, -7.0f };
+	//circle.vel = { 0.0f, 0.0f };
+	//circle.friction = 0.0f;
+	//circle.restitution = 1.0f;
+	//circle.gravityScale = 0.0f;
+	//world.particles.push_back(circle);
+
+	circle.collider.shape = CIRCLE;
+	circle.collider.radius = 0.5f;
+	circle.collider.dynamic = true;
+
+	circle.pos = { 0.0f, -8.0f };
+	circle.vel = { 0.0f, 0.0f };
+	circle.friction = 0.0f;
+	circle.restitution = 1.0f;
+	circle.gravityScale = 0.0f;
 
 	world.particles.push_back(CreateWall({ 0.0f, 10.0f }, { 0.0f, -1.0f }));	// top
 	world.particles.push_back(CreateWall({ 0.0f, -10.0f }, { 0.0f, 1.0f }));	// bottom
@@ -66,6 +93,8 @@ void Init()
 	world.particles.push_back({});
 	player = &world.particles.back();
 	player->collider.shape = AABB;
+	player->collider.extents = { playerWidth * 0.5f, playerHeight * 0.5f };
+	player->collider.dynamic = false;
 
 	player->pos = { 0.0f, -9.0f };
 	player->invMass = 0.0f;
@@ -89,19 +118,32 @@ void Update(float dt)
 	world.Update(dt);
 
 	const CController& controller = CSimpleControllers::GetInstance().GetController(0);
+	float speed = 5.0f;
+	vec2 direction = {};
+
 	if (controller.GetLeftThumbStickX() < -0.5f)
-		player->vel = { -5.0f, 0.0f };
+		direction.x -= 1.0f;
 	else if (controller.GetLeftThumbStickX() > 0.5f)
-		player->vel = { 5.0f, 0.0f };
-	else
-		player->vel = {};
+		direction.x += 1.0f;
+	if (controller.GetLeftThumbStickY() < -0.5f)
+		direction.y -= 1.0f;
+	else if (controller.GetLeftThumbStickY() > 0.5f)
+		direction.y += 1.0f;
+	player->vel = direction * speed;
+
+	vec2 rec = player->pos - player->collider.extents;
+	float w = player->collider.extents.x * 2.0f;
+	float h = player->collider.extents.y * 2.0f;
+	color = CircleRect2(circle.pos.x, circle.pos.y, circle.collider.radius, rec.x, rec.y, w, h, nullptr)
+		? Color{ 1.0f, 0.0f, 0.0f } : Color{ 0.0f, 1.0f, 0.0f };
 }
 
 void Render()
 {
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	world.Render();
-	DrawRect(player->pos, 2.0, 1.0f, { 1.0f, 0.0f, 0.0f }, true);
+	//world.Render();
+	DrawCircle(circle.pos, circle.collider.radius, color);
+	DrawRect(player->pos, playerWidth, playerHeight, { 1.0f, 0.0f, 0.0f }, true);
 }
 
 void Shutdown()
