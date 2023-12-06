@@ -18,9 +18,6 @@ Particle* player;
 float playerWidth = 2.0f;
 float playerHeight = 1.0f;
 
-Particle circle;
-Color color;
-
 Particle CreateWall(vec2 position, vec2 normal)
 {
 	Particle plane;
@@ -61,28 +58,6 @@ void Init()
 
 	world.particles.push_back(circle1);
 	world.particles.push_back(circle2);
-
-	//Particle circle;
-	//circle.collider.shape = CIRCLE;
-	//circle.collider.radius = 0.5f;
-	//circle.collider.dynamic = true;
-	//
-	//circle.pos = { 0.0f, -7.0f };
-	//circle.vel = { 0.0f, 0.0f };
-	//circle.friction = 0.0f;
-	//circle.restitution = 1.0f;
-	//circle.gravityScale = 0.0f;
-	//world.particles.push_back(circle);
-
-	circle.collider.shape = CIRCLE;
-	circle.collider.radius = 0.5f;
-	circle.collider.dynamic = true;
-
-	circle.pos = { 0.0f, -8.0f };
-	circle.vel = { 0.0f, 0.0f };
-	circle.friction = 0.0f;
-	circle.restitution = 1.0f;
-	circle.gravityScale = 0.0f;
 
 	world.particles.push_back(CreateWall({ 0.0f, 10.0f }, { 0.0f, -1.0f }));	// top
 	world.particles.push_back(CreateWall({ 0.0f, -10.0f }, { 0.0f, 1.0f }));	// bottom
@@ -130,25 +105,12 @@ void Update(float dt)
 	else if (controller.GetLeftThumbStickY() > 0.5f)
 		direction.y += 1.0f;
 	player->vel = direction * speed;
-
-	//vec2 rec = player->pos - player->collider.extents;
-	//float w = player->collider.extents.x * 2.0f;
-	//float h = player->collider.extents.y * 2.0f;
-	//color = CircleRect2(circle.pos.x, circle.pos.y, circle.collider.radius, rec.x, rec.y, w, h)
-	//	? Color{ 1.0f, 0.0f, 0.0f } : Color{ 0.0f, 1.0f, 0.0f };
-
-	vec2 mtv{};
-	color = CircleRect2(circle.pos, circle.collider.radius, player->pos, player->collider.extents, &mtv)
-		? Color{ 1.0f, 0.0f, 0.0f } : Color{ 0.0f, 1.0f, 0.0f };
-
-	circle.pos = circle.pos + mtv;
 }
 
 void Render()
 {
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	world.Render();
-	//DrawCircle(circle.pos, circle.collider.radius, color);
 	DrawRect(player->pos, playerWidth, playerHeight, { 1.0f, 0.0f, 0.0f }, true);
 }
 

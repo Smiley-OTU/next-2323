@@ -55,59 +55,21 @@ inline bool CircleCircle(vec2 pos1, float radius1, vec2 pos2, float radius2, vec
     return collision;
 }
 
-// TODO -- fix this and make it look nice
-// mtv points from box to circle
-//inline bool CircleRect(vec2 circleCenter, float radius, vec2 rectCenter, vec2 halfExtents, vec2* mtv = nullptr)
-//{
-//    vec2 nearest;
-//    // We need to change how these are calculated
-//    float xMin = rectCenter.x - halfExtents.x;
-//    float xMax = rectCenter.x + halfExtents.x;
-//    float yMin = rectCenter.y - halfExtents.y;
-//    float yMax = rectCenter.y + halfExtents.y;
-//    nearest.x = circleCenter.x < xMin ? xMin : xMax;
-//    nearest.y = circleCenter.y < yMin ? yMin : yMax;
-//
-//    float distance = Length(circleCenter - nearest);
-//    bool collision = distance <= radius;
-//    if (collision && mtv != nullptr)
-//        *mtv = Normalize(circleCenter - rectCenter) * (radius - distance);
-//    return collision;
-//}
-
-inline bool CircleRect2(float cx, float cy, float radius, float rx, float ry, float rw, float rh, vec2* mtv = nullptr)
+// mtv points from rect to circle
+inline bool CircleRect(vec2 circle, float radius, vec2 rect, vec2 extents, vec2* mtv = nullptr)
 {
-    // temporary variables to set edges for testing
-    float testX = cx;
-    float testY = cy;
-
-    // which edge is closest?
-    if (cx < rx)         testX = rx;      // test left edge
-    else if (cx > rx + rw) testX = rx + rw;   // right edge
-    if (cy < ry)         testY = ry;      // top edge
-    else if (cy > ry + rh) testY = ry + rh;   // bottom edge
-
-    // get distance from closest edges
-    float distX = cx - testX;
-    float distY = cy - testY;
-    float distance = sqrt((distX * distX) + (distY * distY));
-    return distance <= radius;
-}
-
-inline bool CircleRect2(vec2 circle, float radius, vec2 rect, vec2 extents, vec2* mtv = nullptr)
-{
-    vec2 test = circle;
+    vec2 nearest = circle;
     float xMin = rect.x - extents.x;
     float xMax = rect.x + extents.x;
     float yMin = rect.y - extents.y;
     float yMax = rect.y + extents.y;
 
-    if (circle.x < xMin) test.x = xMin;
-    else if (circle.x > xMax) test.x = xMax;
-    if (circle.y < yMin) test.y = yMin;
-    else if (circle.y > yMax) test.y = yMax;
+    if (circle.x < xMin) nearest.x = xMin;
+    else if (circle.x > xMax) nearest.x = xMax;
+    if (circle.y < yMin) nearest.y = yMin;
+    else if (circle.y > yMax) nearest.y = yMax;
 
-    float distance = Length(circle - test);
+    float distance = Length(circle - nearest);
     bool collision = distance <= radius;
     if (collision && mtv != nullptr)
         *mtv = Normalize(circle - rect) * (radius - distance);
@@ -136,14 +98,10 @@ inline bool HitTest(vec2 pos1, vec2 pos2, Collider col1, Collider col2, vec2* mt
         return CirclePlane(pos2, col2.radius, pos1, col1.normal, mtv);
 
     if (col1.shape == CIRCLE && col2.shape == AABB)
-        return CircleRect2(pos1, col1.radius, pos2, col2.extents, mtv);
-        //return CircleRect2(pos1.x, pos1.y, col1.radius, pos2.x - col2.extents.x, pos2.y - col2.extents.y,
-        //    col2.extents.x * 2.0f, col2.extents.y * 2.0f, mtv);
+        return CircleRect(pos1, col1.radius, pos2, col2.extents, mtv);
 
     if (col1.shape == AABB && col2.shape == CIRCLE)
-        return CircleRect2(pos2, col2.radius, pos1, col1.extents, mtv);
-        //return CircleRect2(pos2.x, pos2.y, col2.radius, pos1.x - col1.extents.x, pos1.y - col1.extents.y,
-        //    col1.extents.x * 2.0f, col1.extents.y * 2.0f, mtv);
+        return CircleRect(pos2, col2.radius, pos1, col1.extents, mtv);
 
     return false;
 }
