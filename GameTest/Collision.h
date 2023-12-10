@@ -62,16 +62,16 @@ inline bool HitTest(vec2 pos1, vec2 pos2, Collider col1, Collider col2, vec2* mt
     return false;
 }
 
-inline std::vector<Manifold> HitTest(const std::vector<Entity>& particles)
+inline std::vector<Manifold> HitTest(const std::vector<Entity>& entities)
 {
     std::vector<Manifold> collisions;
-    for (size_t i = 0; i < particles.size(); i++)
+    for (size_t i = 0; i < entities.size(); i++)
     {
-        for (size_t j = i + 1; j < particles.size(); j++)
+        for (size_t j = i + 1; j < entities.size(); j++)
         {
             Manifold manifold;
-            const Entity& a = particles[i];
-            const Entity& b = particles[j];
+            const Entity& a = entities[i];
+            const Entity& b = entities[j];
             if (a.disabled || b.disabled) continue;
             if (HitTest(a.pos, b.pos, a.collider, b.collider, &manifold.mtv))
             {

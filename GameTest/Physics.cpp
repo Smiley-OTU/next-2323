@@ -15,16 +15,16 @@ void Physics::Step(float dt, Entities& entities)
 {
     for (size_t i = 0; i < entities.size(); i++)
     {
-        Entity& p = entities[i];
+        Entity& entity = entities[i];
 
-        vec2 fa = p.force * p.invMass;
-        vec2 fg = gravity * p.gravityScale;
-        p.acc = fa + fg;
+        vec2 fa = entity.force * entity.invMass;
+        vec2 fg = gravity * entity.gravityScale;
+        entity.acc = fa + fg;
 
-        p.vel = p.vel + p.acc * dt;
-        p.pos = p.pos + p.vel * dt;
+        entity.vel = entity.vel + entity.acc * dt;
+        entity.pos = entity.pos + entity.vel * dt;
 
-        p.force = v2zero;
+        entity.force = v2zero;
     }
 
     std::vector<Manifold> collisions = HitTest(entities);
@@ -58,15 +58,15 @@ void Physics::Render(const Entities& entities)
     for (size_t i = 0; i < entities.size(); i++)
     {
         Color color = collisions[i] ? Color{ 1.0f, 0.0f, 0.0f } : Color{ 0.0f, 1.0f, 0.0f };
-        const Entity& p = entities[i];
-        switch (p.collider.shape)
+        const Entity& entity = entities[i];
+        switch (entity.collider.shape)
         {
         case CIRCLE:
-            DrawCircle(p.pos, p.collider.radius, color);
+            DrawCircle(entity.pos, entity.collider.radius, color);
             break;
 
         case AABB:
-            DrawRect(p.pos, p.collider.extents.x * 2.0f, p.collider.extents.y * 2.0f, color);
+            DrawRect(entity.pos, entity.collider.extents.x * 2.0f, entity.collider.extents.y * 2.0f, color);
             break;
 
         case PLANE:
