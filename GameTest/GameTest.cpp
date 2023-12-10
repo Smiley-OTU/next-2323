@@ -17,6 +17,25 @@ PhysicsWorld world;
 Particle* player;
 float playerWidth = 2.0f;
 float playerHeight = 1.0f;
+Vector2 mouse{};
+
+struct Renderer
+{
+	Matrix proj;
+	Matrix view;
+} renderer;
+
+Vector2 ScreenToWorld(Matrix view, Matrix proj, Vector2 screen)
+{
+	APP_VIRTUAL_TO_NATIVE_COORDS(screen.x, screen.y);
+	Vector4 clip{ screen.x, screen.y, 0.0f, 1.0f };
+	Matrix inv = Invert(proj * view);
+	Vector4 world = Multiply(clip, inv);
+	world.x *= world.w;	
+	world.y *= world.w;	
+	world.z *= world.w;
+	return { world.x, world.y };
+}
 
 Particle CreateWall(vec2 position, vec2 normal)
 {
@@ -76,19 +95,18 @@ void Init()
 	player->gravityScale = 0.0f;
 
 	glMatrixMode(GL_PROJECTION);
-	glOrtho(-10.0f, 10.0f, -10.0f, 10.0f, -1.0f, 1.0f);
-
-	Vector3 eye{ 0.0f, 0.0f, 0.5f };
-	Vector3 target{ 0.0f, 0.0f, 0.0f };
-	Vector3 up{ 0.0f, 1.0f, 0.0f };
-	Matrix view = Transpose(LookAt(eye, target, up));
+	renderer.proj = Transpose(Ortho(-10.0f, 10.0f, -10.0f, 10.0f, -1.0f, 1.0f));
+	glMultMatrixf((float*)&renderer.proj);
 
 	glMatrixMode(GL_MODELVIEW);
-	glMultMatrixf((float*)&view);
+	renderer.view = Transpose(LookAt({ 0.0f, 0.0f, 0.5f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }));
+	glMultMatrixf((float*)&renderer.view);
 }
 
 void Update(float dt)
 {
+	App::GetMousePos(mouse.x, mouse.y);
+	mouse = ScreenToWorld(renderer.view, renderer.proj, mouse);
 	dt /= 1000.0f;
 	world.Update(dt);
 
@@ -112,6 +130,7 @@ void Render()
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	world.Render();
 	DrawRect(player->pos, playerWidth, playerHeight, { 1.0f, 0.0f, 0.0f }, true);
+	DrawRect({ mouse.x, mouse.y }, 1.0f, 1.0f, { 1.0f, 0.0f, 1.0f });
 }
 
 void Shutdown()
