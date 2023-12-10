@@ -14,16 +14,14 @@
 // TODO -- turn this into brick break with students?
 // TODO -- make an ECS? Physics is a solved problems... Now we need a video game!!!
 PhysicsWorld world;
+
 Particle* player;
 float playerWidth = 2.0f;
 float playerHeight = 1.0f;
-vec2 mouse{};
 
-struct Renderer
-{
-	Matrix proj;
-	Matrix view;
-} renderer;
+Matrix proj;
+Matrix view;
+vec2 mouse{};
 
 Particle CreateWall(vec2 position, vec2 normal)
 {
@@ -82,21 +80,20 @@ void Init()
 	player->invMass = 0.0f;
 	player->gravityScale = 0.0f;
 	
-
 	glMatrixMode(GL_PROJECTION);
-	renderer.proj = Transpose(Ortho(-10.0f, 10.0f, -10.0f, 10.0f, -1.0f, 1.0f));
-	glMultMatrixf((float*)&renderer.proj);
+	proj = Transpose(Ortho(-10.0f, 10.0f, -10.0f, 10.0f, -1.0f, 1.0f));
+	glMultMatrixf((float*)&proj);
 
 	glMatrixMode(GL_MODELVIEW);
-	renderer.view = Transpose(LookAt({ 0.0f, 0.0f, 0.5f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }));
-	glMultMatrixf((float*)&renderer.view);
+	view = Transpose(LookAt({ 0.0f, 0.0f, 0.5f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }));
+	glMultMatrixf((float*)&view);
 }
 
 void Update(float dt)
 {
 	float mx, my;
 	App::GetMousePos(mx, my);
-	mouse = ScreenToWorld(renderer.view, renderer.proj, { mx, my });
+	mouse = ScreenToWorld(view, proj, { mx, my });
 
 	dt /= 1000.0f;
 	world.Update(dt);
@@ -120,13 +117,14 @@ void Render()
 {
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	world.Render();
-	DrawRect(player->pos, playerWidth, playerHeight, { 1.0f, 0.0f, 0.0f }, true);
 
-	vec2 cursor = WorldToScreen({ mouse.x, mouse.y }, renderer.view, renderer.proj);
+	DrawRect(player->pos, playerWidth, playerHeight, { 1.0f, 0.0f, 0.0f }, true);
+	DrawRect(mouse, 1.0f, 1.0f, { 1.0f, 0.0f, 1.0f });
+
+	vec2 cursor = WorldToScreen({ mouse.x, mouse.y }, view, proj);
 	char buffer[64];
 	sprintf(buffer, "x: %f, y: %f", cursor.x, cursor.y);
 	DrawText({ -9.9f, 9.5f }, buffer, { 1.0f, 0.0f, 1.0f });
-	DrawRect(mouse, 1.0f, 1.0f, { 1.0f, 0.0f, 1.0f });
 }
 
 void Shutdown()
