@@ -39,6 +39,22 @@ Particle CreateWall(vec2 position, vec2 normal)
 	return plane;
 }
 
+Particle CreateBrick(vec2 position, float w, float h)
+{
+	Particle brick;
+	brick.collider.shape = AABB;
+	brick.collider.extents = { w * 0.5f, h * 0.5f };
+	brick.collider.dynamic = false;
+
+	brick.pos = position;
+	brick.gravityScale = 0.0f;
+	brick.invMass = 0.0f;
+	brick.friction = 1.0f;
+	brick.restitution = 1.0f;
+
+	return brick;
+}
+
 void Init()
 {
 	Particle circle1;
@@ -125,6 +141,24 @@ void Render()
 	char buffer[64];
 	sprintf(buffer, "x: %f, y: %f", cursor.x, cursor.y);
 	DrawText({ -9.9f, 9.5f }, buffer, { 1.0f, 0.0f, 1.0f });
+
+	size_t rowCount = 8;
+	size_t colCount = 8;
+	float brickWidth = 20.0f / (colCount + 2);
+	float brickHeight = 20.0f / (rowCount + 4);
+
+	float x, y = -10.0f + brickHeight * 3.5f;
+	for (size_t i = 0; i < rowCount; i++)
+	{
+		x = -10.0f + brickWidth * 1.5f;
+		for (size_t j = 0; j < colCount; j++)
+		{
+			DrawRect({ x, y }, brickWidth, brickHeight, { 1.0f, 0.0f, 0.0f });
+			DrawRect({ x, y }, brickWidth, brickHeight, { 1.0f, 0.0f, 1.0f }, true);
+			x += brickWidth;
+		}
+		y += brickHeight;
+	}
 }
 
 void Shutdown()
