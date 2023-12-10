@@ -11,6 +11,13 @@ constexpr float TWO_PI  = PI * 2.0f;
 //constexpr float DEG2RAD = PI / 180.0f;
 //constexpr float RAD2DEG = 180.0f / PI;
 
+struct Color
+{
+	float r = 0.0f;
+	float g = 0.0f;
+	float b = 0.0f;
+};
+
 struct vec2
 {
 	float x = 0.0f;

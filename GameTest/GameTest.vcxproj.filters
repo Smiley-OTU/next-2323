@@ -66,6 +66,9 @@
     <ClInclude Include="Math2.h">
       <Filter>Engine</Filter>
     </ClInclude>
+    <ClInclude Include="Entity.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="NextAPI">

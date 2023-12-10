@@ -3,13 +3,6 @@
 #include "Math.h"
 #include <vector>
 
-struct Color
-{
-	float r = 0.0f;
-	float g = 0.0f;
-	float b = 0.0f;
-};
-
 inline vec2 ScreenToWorld(Matrix view, Matrix proj, Vector2 screen)
 {
 	APP_VIRTUAL_TO_NATIVE_COORDS(screen.x, screen.y);

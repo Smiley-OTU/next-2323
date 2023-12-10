@@ -1,21 +1,21 @@
 #include "Physics.h"
 #include "Graphics.h"
 
-void PhysicsWorld::Update(float dt)
+void Physics::Update(float dt, Entities& entities)
 {
     while (prevTime < currTime)
     {
         prevTime += timestep;
-        Step(timestep);
+        Step(timestep, entities);
     }
     currTime += dt;
 }
 
-void PhysicsWorld::Step(float dt)
+void Physics::Step(float dt, Entities& entities)
 {
-    for (size_t i = 0; i < particles.size(); i++)
+    for (size_t i = 0; i < entities.size(); i++)
     {
-        Particle& p = particles[i];
+        Entity& p = entities[i];
 
         vec2 fa = p.force * p.invMass;
         vec2 fg = gravity * p.gravityScale;
@@ -27,31 +27,38 @@ void PhysicsWorld::Step(float dt)
         p.force = v2zero;
     }
 
-    mCollisions = HitTest(particles);
-    for (const Manifold& collision : mCollisions)
+    std::vector<Manifold> collisions = HitTest(entities);
+    for (const Manifold& collision : collisions)
     {
         ResolveVelocity(collision);
         ResolvePosition(collision);
+
+        Entity& a = *collision.a;
+        Entity& b = *collision.b;
+        if (a.onCollision != nullptr)
+            a.onCollision(b);
+        if (b.onCollision != nullptr)
+            b.onCollision(a);
     }
 }
 
-void PhysicsWorld::Render()
+void Physics::Render(const Entities& entities)
 {
-    std::vector<bool> collisions(particles.size());
-    for (size_t i = 0; i < particles.size(); i++)
+    std::vector<bool> collisions(entities.size());
+    for (size_t i = 0; i < entities.size(); i++)
     {
-        for (size_t j = i + 1; j < particles.size(); j++)
+        for (size_t j = i + 1; j < entities.size(); j++)
         {
-            const Particle& a = particles[i];
-            const Particle& b = particles[j];
+            const Entity& a = entities[i];
+            const Entity& b = entities[j];
             collisions[i] = collisions[i] || HitTest(a.pos, b.pos, a.collider, b.collider);
         }
     }
     
-    for (size_t i = 0; i < particles.size(); i++)
+    for (size_t i = 0; i < entities.size(); i++)
     {
         Color color = collisions[i] ? Color{ 1.0f, 0.0f, 0.0f } : Color{ 0.0f, 1.0f, 0.0f };
-        const Particle& p = particles[i];
+        const Entity& p = entities[i];
         switch (p.collider.shape)
         {
         case CIRCLE:
@@ -59,8 +66,7 @@ void PhysicsWorld::Render()
             break;
 
         case AABB:
-            DrawRect(p.pos, p.collider.extents.x * 2.0f, p.collider.extents.y * 2.0f, { 0.0f, 0.0f, 1.0f });
-            DrawRect(p.pos, p.collider.extents.x * 2.0f, p.collider.extents.y * 2.0f, { 0.0f, 1.0f, 1.0f }, true);
+            DrawRect(p.pos, p.collider.extents.x * 2.0f, p.collider.extents.y * 2.0f, color);
             break;
 
         case PLANE:

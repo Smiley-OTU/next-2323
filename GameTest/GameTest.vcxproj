@@ -183,6 +183,7 @@
     <ClInclude Include="App\SimpleSound.h" />
     <ClInclude Include="App\SimpleSprite.h" />
     <ClInclude Include="Collision.h" />
+    <ClInclude Include="Entity.h" />
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="Math2.h" />
     <ClInclude Include="Physics.h" />

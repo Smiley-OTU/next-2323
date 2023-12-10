@@ -1,45 +1,10 @@
 #pragma once
-#include "Math.h"
-#include <vector>
-
-enum Shape
-{
-    CIRCLE,
-    PLANE,
-    AABB
-};
-
-struct Collider
-{
-    union
-    {
-        vec2 normal{};
-        vec2 extents;
-        float radius;
-    };
-    Shape shape = CIRCLE;
-    bool dynamic = false;
-};
-
-struct Particle
-{
-    vec2 pos;
-    vec2 vel;
-    vec2 acc;
-    vec2 force;
-
-    float gravityScale = 1.0f;
-    float invMass = 1.0f;
-    float friction = 0.0f;
-    float restitution = 1.0f;
-
-    Collider collider;
-};
+#include "Entity.h"
 
 struct Manifold
 {
-    Particle* a = nullptr;
-    Particle* b = nullptr;
+    Entity* a = nullptr;
+    Entity* b = nullptr;
     vec2 mtv{};
 };
 
@@ -55,21 +20,6 @@ inline bool CircleCircle(vec2 pos1, float radius1, vec2 pos2, float radius2, vec
     return collision;
 }
 
-// mtv points from rect to circle
-inline bool CircleRect(vec2 circle, float radius, vec2 rect, vec2 extents, vec2* mtv = nullptr)
-{
-    vec2 nearest = {
-        Clamp(circle.x, rect.x - extents.x, rect.x + extents.x),
-        Clamp(circle.y, rect.y - extents.y, rect.y + extents.y),
-    };
-
-    float distance = Length(circle - nearest);
-    bool collision = distance <= radius;
-    if (collision && mtv != nullptr)
-        *mtv = Normalize(circle - rect) * (radius - distance);
-    return collision;
-}
-
 // mtv points from plane to sphere
 inline bool CirclePlane(vec2 circle, float radius, vec2 plane, vec2 normal, vec2* mtv = nullptr)
 {
@@ -78,6 +28,18 @@ inline bool CirclePlane(vec2 circle, float radius, vec2 plane, vec2 normal, vec2
     if (collision && mtv != nullptr)
         *mtv = normal * (radius - distance);
     return collision;
+}
+
+// mtv points from rect to circle
+inline bool CircleRect(vec2 circle, float radius, vec2 rect, vec2 extents, vec2* mtv = nullptr)
+{
+    vec2 nearest = {
+        Clamp(circle.x, rect.x - extents.x, rect.x + extents.x),
+        Clamp(circle.y, rect.y - extents.y, rect.y + extents.y),
+    };
+
+    vec2 normal = Normalize(circle - nearest);
+    return CirclePlane(circle, radius, nearest, normal, mtv);
 }
 
 inline bool HitTest(vec2 pos1, vec2 pos2, Collider col1, Collider col2, vec2* mtv = nullptr)
@@ -100,7 +62,7 @@ inline bool HitTest(vec2 pos1, vec2 pos2, Collider col1, Collider col2, vec2* mt
     return false;
 }
 
-inline std::vector<Manifold> HitTest(const std::vector<Particle>& particles)
+inline std::vector<Manifold> HitTest(const std::vector<Entity>& particles)
 {
     std::vector<Manifold> collisions;
     for (size_t i = 0; i < particles.size(); i++)
@@ -108,19 +70,22 @@ inline std::vector<Manifold> HitTest(const std::vector<Particle>& particles)
         for (size_t j = i + 1; j < particles.size(); j++)
         {
             Manifold manifold;
-            const Particle& a = particles[i];
-            const Particle& b = particles[j];
+            const Entity& a = particles[i];
+            const Entity& b = particles[j];
+            if (a.disabled || b.disabled) continue;
             if (HitTest(a.pos, b.pos, a.collider, b.collider, &manifold.mtv))
             {
-                if (!a.collider.dynamic && b.collider.dynamic)
-                {
-                    manifold.mtv = manifold.mtv * -1.0f;
-                    manifold.a = (Particle*)&b, manifold.b = (Particle*)&a;
-                }
+                // Ensure A is always dynamic and B is either static or dynamic
+                if (!a.invMass > 0.0f && b.invMass > 0.0f)
+                    manifold.a = (Entity*)&b, manifold.b = (Entity*)&a;
                 else
-                {
-                    manifold.a = (Particle*)&a, manifold.b = (Particle*)&b;
-                }
+                    manifold.a = (Entity*)&a, manifold.b = (Entity*)&b;
+
+                // Ensure the mtv always points from B to A
+                //if (Dot(manifold.a->pos - manifold.b->pos, manifold.mtv) < 0.0f)
+                //    manifold.mtv = manifold.mtv * -1.0f;
+                // This is somehow breaking things...
+
                 collisions.push_back(manifold);
             }
         }
@@ -131,8 +96,8 @@ inline std::vector<Manifold> HitTest(const std::vector<Particle>& particles)
 inline void ResolveVelocity(Manifold collision)
 {
     // e = restitution, j = impulse, jt = tangent impulse (friciton), mu = friction coefficient
-    Particle& a = *collision.a;
-    Particle& b = *collision.b;
+    Entity& a = *collision.a;
+    Entity& b = *collision.b;
 
     // Exit if objects are separating or both have infinite masses
     vec2 normal = Normalize(collision.mtv);
@@ -148,19 +113,19 @@ inline void ResolveVelocity(Manifold collision)
     b.vel = b.vel - normal * j * b.invMass;
 
     // Friction
-    vec2 tangent = Normalize(velBA - normal * t);
-    float jt = -Dot(velBA, tangent) / (a.invMass + b.invMass);
-    float mu = sqrtf(a.friction * b.friction);
-    jt = Clamp(jt, -j * mu, j * mu);
-    a.vel = a.vel + tangent * jt * a.invMass;
-    b.vel = b.vel + tangent * jt * b.invMass;
+    //vec2 tangent = Normalize(velBA - normal * t);
+    //float jt = -Dot(velBA, tangent) / (a.invMass + b.invMass);
+    //float mu = sqrtf(a.friction * b.friction);
+    //jt = Clamp(jt, -j * mu, j * mu);
+    //a.vel = a.vel + tangent * jt * a.invMass;
+    //b.vel = b.vel + tangent * jt * b.invMass;
 }
 
 inline void ResolvePosition(Manifold collision)
 {
-    Particle& a = *collision.a;
-    Particle& b = *collision.b;
-    if (b.collider.dynamic)
+    Entity& a = *collision.a;
+    Entity& b = *collision.b;
+    if (b.invMass > 0.0f)
     {
         a.pos = a.pos + collision.mtv * 0.5f;
         b.pos = b.pos - collision.mtv * 0.5f;
