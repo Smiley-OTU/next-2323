@@ -58,16 +58,10 @@ inline bool CircleCircle(vec2 pos1, float radius1, vec2 pos2, float radius2, vec
 // mtv points from rect to circle
 inline bool CircleRect(vec2 circle, float radius, vec2 rect, vec2 extents, vec2* mtv = nullptr)
 {
-    vec2 nearest = circle;
-    float xMin = rect.x - extents.x;
-    float xMax = rect.x + extents.x;
-    float yMin = rect.y - extents.y;
-    float yMax = rect.y + extents.y;
-
-    if (circle.x < xMin) nearest.x = xMin;
-    else if (circle.x > xMax) nearest.x = xMax;
-    if (circle.y < yMin) nearest.y = yMin;
-    else if (circle.y > yMax) nearest.y = yMax;
+    vec2 nearest = {
+        Clamp(circle.x, rect.x - extents.x, rect.x + extents.x),
+        Clamp(circle.y, rect.y - extents.y, rect.y + extents.y),
+    };
 
     float distance = Length(circle - nearest);
     bool collision = distance <= radius;
