@@ -49,7 +49,7 @@ namespace App
 	// You can then use the CSimpleSprite methods to animate/move etc.
 	//-------------------------------------------------------------------------------------------
 	CSimpleSprite *CreateSprite(const char *fileName, int columns, int rows);
-		
+	
 	//*******************************************************************************************
 	// Sound handling.	
 	//*******************************************************************************************

@@ -17,25 +17,13 @@ PhysicsWorld world;
 Particle* player;
 float playerWidth = 2.0f;
 float playerHeight = 1.0f;
-Vector2 mouse{};
+vec2 mouse{};
 
 struct Renderer
 {
 	Matrix proj;
 	Matrix view;
 } renderer;
-
-Vector2 ScreenToWorld(Matrix view, Matrix proj, Vector2 screen)
-{
-	APP_VIRTUAL_TO_NATIVE_COORDS(screen.x, screen.y);
-	Vector4 clip{ screen.x, screen.y, 0.0f, 1.0f };
-	Matrix inv = Invert(proj * view);
-	Vector4 world = Multiply(clip, inv);
-	world.x *= world.w;	
-	world.y *= world.w;	
-	world.z *= world.w;
-	return { world.x, world.y };
-}
 
 Particle CreateWall(vec2 position, vec2 normal)
 {
@@ -93,6 +81,7 @@ void Init()
 	player->pos = { 0.0f, -9.0f };
 	player->invMass = 0.0f;
 	player->gravityScale = 0.0f;
+	
 
 	glMatrixMode(GL_PROJECTION);
 	renderer.proj = Transpose(Ortho(-10.0f, 10.0f, -10.0f, 10.0f, -1.0f, 1.0f));
@@ -105,8 +94,10 @@ void Init()
 
 void Update(float dt)
 {
-	App::GetMousePos(mouse.x, mouse.y);
-	mouse = ScreenToWorld(renderer.view, renderer.proj, mouse);
+	float mx, my;
+	App::GetMousePos(mx, my);
+	mouse = ScreenToWorld(renderer.view, renderer.proj, { mx, my });
+
 	dt /= 1000.0f;
 	world.Update(dt);
 
@@ -130,7 +121,12 @@ void Render()
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	world.Render();
 	DrawRect(player->pos, playerWidth, playerHeight, { 1.0f, 0.0f, 0.0f }, true);
-	DrawRect({ mouse.x, mouse.y }, 1.0f, 1.0f, { 1.0f, 0.0f, 1.0f });
+
+	vec2 cursor = WorldToScreen({ mouse.x, mouse.y }, renderer.view, renderer.proj);
+	char buffer[64];
+	sprintf(buffer, "x: %f, y: %f", cursor.x, cursor.y);
+	DrawText({ -9.9f, 9.5f }, buffer, { 1.0f, 0.0f, 1.0f });
+	DrawRect(mouse, 1.0f, 1.0f, { 1.0f, 0.0f, 1.0f });
 }
 
 void Shutdown()
