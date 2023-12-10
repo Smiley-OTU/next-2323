@@ -58,6 +58,11 @@ void PhysicsWorld::Render()
             DrawCircle(p.pos, p.collider.radius, color);
             break;
 
+        case AABB:
+            DrawRect(p.pos, p.collider.extents.x * 2.0f, p.collider.extents.y * 2.0f, { 0.0f, 0.0f, 1.0f });
+            DrawRect(p.pos, p.collider.extents.x * 2.0f, p.collider.extents.y * 2.0f, { 0.0f, 1.0f, 1.0f }, true);
+            break;
+
         case PLANE:
             break;
         }

@@ -62,8 +62,8 @@ void Init()
 	circle1.collider.radius = 0.5f;
 	circle1.collider.dynamic = true;
 	
-	circle1.pos = { 5.0f, 5.0f };
-	circle1.vel = { -5.0f, 0.0f };
+	circle1.pos = { -9.0f, 0.0f };
+	circle1.vel = { 0.0f, 0.0f };
 	circle1.friction = 0.0f;
 	circle1.restitution = 1.0f;
 
@@ -72,8 +72,8 @@ void Init()
 	circle2.collider.radius = 0.5f;
 	circle2.collider.dynamic = true;
 
-	circle2.pos = { -5.0f, -5.0f };
-	circle2.vel = {  5.0f, 0.0f };
+	circle2.pos = { 9.0f, 0.0f };
+	circle2.vel = {  0.0f, 0.0f };
 	circle2.friction = 0.0f;
 	circle2.restitution = 1.0f;
 
@@ -84,6 +84,22 @@ void Init()
 	world.particles.push_back(CreateWall({ 0.0f, -10.0f }, { 0.0f, 1.0f }));	// bottom
 	world.particles.push_back(CreateWall({ -10.0f, 0.0f }, { 1.0f, 0.0f }));	// left
 	world.particles.push_back(CreateWall({ 10.0f, 0.0f }, { -1.0f, 0.0f }));	// right
+
+	size_t rowCount = 8;
+	size_t colCount = 8;
+	float brickWidth = 20.0f / (colCount + 2);
+	float brickHeight = 20.0f / (rowCount + 4);
+	float x, y = -10.0f + brickHeight * 3.5f;
+	for (size_t i = 0; i < rowCount; i++)
+	{
+		x = -10.0f + brickWidth * 1.5f;
+		for (size_t j = 0; j < colCount; j++)
+		{
+			world.particles.push_back(CreateBrick({ x, y }, brickWidth, brickHeight));
+			x += brickWidth;
+		}
+		y += brickHeight;
+	}
 
 	// Hack so the player's memory address doesn't change
 	world.particles.push_back({});
@@ -141,24 +157,6 @@ void Render()
 	char buffer[64];
 	sprintf(buffer, "x: %f, y: %f", cursor.x, cursor.y);
 	DrawText({ -9.9f, 9.5f }, buffer, { 1.0f, 0.0f, 1.0f });
-
-	size_t rowCount = 8;
-	size_t colCount = 8;
-	float brickWidth = 20.0f / (colCount + 2);
-	float brickHeight = 20.0f / (rowCount + 4);
-
-	float x, y = -10.0f + brickHeight * 3.5f;
-	for (size_t i = 0; i < rowCount; i++)
-	{
-		x = -10.0f + brickWidth * 1.5f;
-		for (size_t j = 0; j < colCount; j++)
-		{
-			DrawRect({ x, y }, brickWidth, brickHeight, { 1.0f, 0.0f, 0.0f });
-			DrawRect({ x, y }, brickWidth, brickHeight, { 1.0f, 0.0f, 1.0f }, true);
-			x += brickWidth;
-		}
-		y += brickHeight;
-	}
 }
 
 void Shutdown()
