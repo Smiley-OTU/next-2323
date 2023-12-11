@@ -42,6 +42,21 @@ inline bool CircleRect(vec2 circle, float radius, vec2 rect, vec2 extents, vec2*
     return CirclePlane(circle, radius, nearest, normal, mtv);
 }
 
+inline bool RectRect(vec2 rect1, vec2 extents1, vec2 rect2, vec2 extents2, vec2* mtv = nullptr)
+{
+    float xMin1 = rect1.x - extents1.x;
+    float xMax1 = rect1.x + extents1.x;
+    float yMin1 = rect1.y - extents1.y;
+    float yMax1 = rect1.y + extents1.y;
+
+    float xMin2 = rect2.x - extents2.x;
+    float xMax2 = rect2.x + extents2.x;
+    float yMin2 = rect2.y - extents2.y;
+    float yMax2 = rect2.y + extents2.y;
+
+    return Overlaps(xMin1, xMax1, xMin2, xMax2) && Overlaps(yMin1, yMax1, yMin2, yMax2);
+}
+
 inline bool HitTest(vec2 pos1, vec2 pos2, Collider col1, Collider col2, vec2* mtv = nullptr)
 {
     if (col1.shape == CIRCLE && col2.shape == CIRCLE)

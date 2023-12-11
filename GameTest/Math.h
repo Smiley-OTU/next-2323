@@ -71,3 +71,15 @@ inline vec2 Project(const vec2& a, const vec2& b)
 {
 	return b * (Dot(a, b) / LengthSqr(b));
 }
+
+// Scalar overlap test
+inline bool Overlaps(float min1, float max1, float min2, float max2)
+{
+	return !((max1 < min2) || (max2 < min1));
+}
+
+// Scalar overlap difference
+inline float Overlap(float min1, float max1, float min2, float max2)
+{
+	return fminf(max1, max2) - fmaxf(min1, min2);
+}

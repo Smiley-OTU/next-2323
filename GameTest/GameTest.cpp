@@ -20,6 +20,8 @@ Matrix proj;
 Matrix view;
 vec2 mouse{};
 
+vec2 testExtents{ 3.0f, 2.0f };
+
 enum GameState
 {
 	TITLE,
@@ -213,39 +215,45 @@ void DrawEntities()
 
 void Render()
 {
-	switch (gameState)
-	{
-	case TITLE:
-		glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
-		DrawRect(play, BUTTON_WIDTH, BUTTON_HEIGHT, { 0.0f, 1.0f, 0.0f });
-		DrawText(play, "PLAY");
-		DrawRect(instructions, BUTTON_WIDTH, BUTTON_HEIGHT, { 0.0f, 1.0f, 1.0f });
-		DrawText(instructions, "INSTRUCTIONS");
-		DrawRect(quit, BUTTON_WIDTH, BUTTON_HEIGHT, { 1.0f, 0.0f, 0.0f });
-		DrawText(quit, "QUIT");
-		break;
+	Color color = RectRect(mouse, testExtents, {}, testExtents) ? Color{ 1.0f, 0.0f, 0.0f } : Color{ 0.0f, 1.0f, 0.0f };
+	DrawRect(mouse, testExtents.x * 2.0f, testExtents.y * 2.0f, color);
+	DrawRect({}, testExtents.x * 2.0f, testExtents.y * 2.0f, color);
 
-	case INSTRUCTIONS:
-		break;
+	//DrawRect({}, testExtents.x * 2.0f, testExtents.y * 2.0f)
 
-	case PLAY:
-		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-		DrawEntities();
-		char text[64];
-		sprintf(text, "Lives: %i", lives);
-		DrawText({ -9.9f, 9.5f }, text, { 1.0f, 0.0f, 0.0f });
-		break;
-
-	case WIN:
-		glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
-		DrawText({ -9.9f, 9.5f }, "You win :)", { 0.0f, 1.0f, 1.0f });
-		break;
-
-	case LOSS:
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		DrawText({ -9.9f, 9.5f }, "You lost :(", { 1.0f, 0.0f, 0.0f });
-		break;
-	}
+	//switch (gameState)
+	//{
+	//case TITLE:
+	//	glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+	//	DrawRect(play, BUTTON_WIDTH, BUTTON_HEIGHT, { 0.0f, 1.0f, 0.0f });
+	//	DrawText(play, "PLAY");
+	//	DrawRect(instructions, BUTTON_WIDTH, BUTTON_HEIGHT, { 0.0f, 1.0f, 1.0f });
+	//	DrawText(instructions, "INSTRUCTIONS");
+	//	DrawRect(quit, BUTTON_WIDTH, BUTTON_HEIGHT, { 1.0f, 0.0f, 0.0f });
+	//	DrawText(quit, "QUIT");
+	//	break;
+	//
+	//case INSTRUCTIONS:
+	//	break;
+	//
+	//case PLAY:
+	//	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	//	DrawEntities();
+	//	char text[64];
+	//	sprintf(text, "Lives: %i", lives);
+	//	DrawText({ -9.9f, 9.5f }, text, { 1.0f, 0.0f, 0.0f });
+	//	break;
+	//
+	//case WIN:
+	//	glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+	//	DrawText({ -9.9f, 9.5f }, "You win :)", { 0.0f, 1.0f, 1.0f });
+	//	break;
+	//
+	//case LOSS:
+	//	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	//	DrawText({ -9.9f, 9.5f }, "You lost :(", { 1.0f, 0.0f, 0.0f });
+	//	break;
+	//}
 }
 
 void Shutdown()
