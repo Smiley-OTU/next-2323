@@ -34,9 +34,9 @@ void Physics::Step(float dt, Entities& entities)
         Entity& a = *collision.a;
         Entity& b = *collision.b;
         if (a.onCollision != nullptr)
-            a.onCollision(b);
+            a.onCollision(a, b);
         if (b.onCollision != nullptr)
-            b.onCollision(a);
+            b.onCollision(b, a);
     }
 }
 

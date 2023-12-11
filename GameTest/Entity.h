@@ -3,7 +3,7 @@
 #include <vector>
 
 struct Entity;
-using OnCollision = void(*)(Entity& entity);
+using OnCollision = void(*)(Entity& self, Entity& other);
 
 enum Shape
 {

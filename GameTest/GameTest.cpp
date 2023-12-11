@@ -11,6 +11,8 @@
 #include "Physics.h"
 #include "Graphics.h"
 
+// TODO 1 -- Add a Game class to handle different screens and replay
+// TODO 2 -- Use kinematics to make particle systems. Spawn debris on brick coillision
 Entities entities;
 Physics physics;
 
@@ -18,9 +20,20 @@ Matrix proj;
 Matrix view;
 vec2 mouse{};
 
+enum GameState
+{
+	PLAY,
+	WIN,
+	LOSS
+} gameState;
+
+int lives = 3;
+int breaks = 0;
 Entity* player;
 constexpr float PLAYER_WIDTH = 2.0f;
 constexpr float PLAYER_HEIGHT = 1.0f;
+
+Entity* ball1, *ball2;
 constexpr float BALL_RADIUS = 0.5f;
 
 constexpr float LEFT = -10.0f;
@@ -65,7 +78,7 @@ Entity CreateBrick(vec2 position)
 	return brick;
 }
 
-void BallCollisionHandler(Entity& entity);
+void BallCollisionHandler(Entity& ball, Entity& other);
 Entity CreateBall(vec2 position)
 {
 	Entity ball;
@@ -104,7 +117,10 @@ void Init()
 	entities.push_back(CreateWall({ 10.0f, 0.0f }, { -1.0f, 0.0f }));	// right
 
 	entities.push_back(CreateBall({ -9.0f, 0.0f }));
+	ball1 = &entities.back();
+
 	entities.push_back(CreateBall({ 9.0f, 0.0f }));
+	ball2 = &entities.back();
 
 	float x, y = BOTTOM + BRICK_HEIGHT * 3.5f;
 	for (size_t i = 0; i < BRICK_ROWS; i++)
@@ -129,10 +145,6 @@ void Init()
 
 void Update(float dt)
 {
-	float mx, my;
-	App::GetMousePos(mx, my);
-	mouse = ScreenToWorld(view, proj, { mx, my });
-
 	dt /= 1000.0f;
 	physics.Update(dt, entities);
 
@@ -144,10 +156,6 @@ void Update(float dt)
 		direction.x -= 1.0f;
 	else if (controller.GetLeftThumbStickX() > 0.5f)
 		direction.x += 1.0f;
-	//if (controller.GetLeftThumbStickY() < -0.5f)
-	//	direction.y -= 1.0f;
-	//else if (controller.GetLeftThumbStickY() > 0.5f)
-	//	direction.y += 1.0f;
 	player->vel = direction * speed;
 }
 
@@ -177,18 +185,26 @@ void DrawEntities()
 
 void Render()
 {
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	DrawEntities();
-	
-	// Debug collision rendering
-	//physics.Render(entities);
-	
-	// Test screen-to-world & world-to-screen
-	//DrawRect(mouse, 1.0f, 1.0f, { 1.0f, 0.0f, 1.0f });
-	//vec2 cursor = WorldToScreen({ mouse.x, mouse.y }, view, proj);
-	//char buffer[64];
-	//sprintf(buffer, "x: %f, y: %f", cursor.x, cursor.y);
-	//DrawText({ -9.9f, 9.5f }, buffer, { 1.0f, 0.0f, 1.0f });
+	switch (gameState)
+	{
+	case PLAY:
+		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+		DrawEntities();
+		char text[64];
+		sprintf(text, "Lives: %i", lives);
+		DrawText({ -9.9f, 9.5f }, text, { 1.0f, 0.0f, 0.0f });
+		break;
+
+	case WIN:
+		glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+		DrawText({ -9.9f, 9.5f }, "You win :)", { 0.0f, 1.0f, 1.0f });
+		break;
+
+	case LOSS:
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		DrawText({ -9.9f, 9.5f }, "You lost :(", { 1.0f, 0.0f, 0.0f });
+		break;
+	}
 }
 
 void Shutdown()
@@ -196,14 +212,35 @@ void Shutdown()
 	entities.resize(0);
 }
 
-void BallCollisionHandler(Entity& entity)
+void OnReset()
 {
-	if (entity.tag == BRICK)
-	{
-		entity.disabled = true;
-	}
-	else if (entity.tag == WALL)
-	{
+	ball1->pos = { -9.0f, 0.0f };
+	ball2->pos = {  9.0f, 0.0f };
+	ball1->vel = ball2->vel = { 0.0f, -10.0f };
+	ball1->disabled = ball2->disabled = false;
+	lives--;
+	if (lives < 0)
+		gameState = LOSS;
+}
 
+void BallCollisionHandler(Entity& ball, Entity& other)
+{
+	if (other.tag == BRICK)
+	{
+		other.disabled = true;
+		breaks++;
+		if (breaks >= BRICK_ROWS * BRICK_COLS)
+			gameState = WIN;
+	}
+	else if (other.tag == WALL)
+	{
+		float hw = (RIGHT - LEFT) * 0.5f - BRICK_WIDTH;
+		float hh = BRICK_HEIGHT;
+		if (CircleRect(ball.pos, BALL_RADIUS, { 0.0f, BOTTOM }, { hw, hh }))
+		{
+			ball.disabled = true;
+		}
+		if (ball1->disabled && ball2->disabled)
+			OnReset();
 	}
 }
