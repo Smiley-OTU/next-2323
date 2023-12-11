@@ -22,6 +22,8 @@ vec2 mouse{};
 
 enum GameState
 {
+	TITLE,
+	INSTRUCTIONS,
 	PLAY,
 	WIN,
 	LOSS
@@ -185,8 +187,28 @@ void DrawEntities()
 
 void Render()
 {
+	float w = RIGHT - LEFT;
+	float h = TOP - BOTTOM;
+	float cx = w * 0.5f;
+	vec2 play = { 0.0f, TOP * 0.5f };
+	vec2 exit = { 0.0f, BOTTOM * 0.5f };
+	vec2 instructions{};
+
 	switch (gameState)
 	{
+	case TITLE:
+		glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+		DrawRect(play, w * 0.33f, h * 0.1f, { 0.0f, 1.0f, 0.0f });
+		DrawText(play, "PLAY");
+		DrawRect(instructions, w * 0.33f, h * 0.1f, { 0.0f, 1.0f, 1.0f });
+		DrawText(instructions, "INSTRUCTIONS");
+		DrawRect(exit, w * 0.33f, h * 0.1f, { 1.0f, 0.0f, 0.0f });
+		DrawText(exit, "EXIT");
+		break;
+
+	case INSTRUCTIONS:
+		break;
+
 	case PLAY:
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		DrawEntities();
