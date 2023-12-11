@@ -43,10 +43,19 @@ constexpr float RIGHT = 10.0f;
 constexpr float TOP = 10.0f;
 constexpr float BOTTOM = -10.0f;
 
+constexpr float WIDTH = (RIGHT - LEFT);
+constexpr float HEIGHT = (TOP - BOTTOM);
+
 constexpr size_t BRICK_ROWS = 8;
 constexpr size_t BRICK_COLS = 8;
-constexpr float BRICK_WIDTH = (RIGHT - LEFT) / (BRICK_COLS + 2);
-constexpr float BRICK_HEIGHT = (TOP - BOTTOM) / (BRICK_ROWS + 4);
+constexpr float BRICK_WIDTH = WIDTH / (BRICK_COLS + 2);
+constexpr float BRICK_HEIGHT = HEIGHT / (BRICK_ROWS + 4);
+
+constexpr float BUTTON_WIDTH = WIDTH * 0.33f;
+constexpr float BUTTON_HEIGHT = HEIGHT * 0.1f;
+vec2 play = { 0.0f, TOP * 0.5f };
+vec2 quit = { 0.0f, BOTTOM * 0.5f };
+vec2 instructions{};
 
 Entity CreateWall(vec2 position, vec2 normal)
 {
@@ -147,12 +156,29 @@ void Init()
 
 void Update(float dt)
 {
+	float mx, my;
+	App::GetMousePos(mx, my);
+	mouse = ScreenToWorld(view, proj, { mx, my });
+
 	dt /= 1000.0f;
 	physics.Update(dt, entities);
 
 	const CController& controller = CSimpleControllers::GetInstance().GetController(0);
 	float speed = 5.0f;
 	vec2 direction = {};
+
+	if (App::IsKeyPressed(VK_LBUTTON))
+	{
+		vec2 extents = vec2{ BUTTON_WIDTH, BUTTON_HEIGHT } * 0.5f;
+		if (CircleRect(mouse, 1.0f, play, extents))
+			gameState = PLAY;
+
+		else if (CircleRect(mouse, 1.0f, instructions, extents))
+			gameState = INSTRUCTIONS;
+
+		else if (CircleRect(mouse, 1.0f, quit, extents))
+			exit(0);
+	}
 
 	if (controller.GetLeftThumbStickX() < -0.5f)
 		direction.x -= 1.0f;
@@ -187,23 +213,16 @@ void DrawEntities()
 
 void Render()
 {
-	float w = RIGHT - LEFT;
-	float h = TOP - BOTTOM;
-	float cx = w * 0.5f;
-	vec2 play = { 0.0f, TOP * 0.5f };
-	vec2 exit = { 0.0f, BOTTOM * 0.5f };
-	vec2 instructions{};
-
 	switch (gameState)
 	{
 	case TITLE:
 		glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
-		DrawRect(play, w * 0.33f, h * 0.1f, { 0.0f, 1.0f, 0.0f });
+		DrawRect(play, BUTTON_WIDTH, BUTTON_HEIGHT, { 0.0f, 1.0f, 0.0f });
 		DrawText(play, "PLAY");
-		DrawRect(instructions, w * 0.33f, h * 0.1f, { 0.0f, 1.0f, 1.0f });
+		DrawRect(instructions, BUTTON_WIDTH, BUTTON_HEIGHT, { 0.0f, 1.0f, 1.0f });
 		DrawText(instructions, "INSTRUCTIONS");
-		DrawRect(exit, w * 0.33f, h * 0.1f, { 1.0f, 0.0f, 0.0f });
-		DrawText(exit, "EXIT");
+		DrawRect(quit, BUTTON_WIDTH, BUTTON_HEIGHT, { 1.0f, 0.0f, 0.0f });
+		DrawText(quit, "QUIT");
 		break;
 
 	case INSTRUCTIONS:
