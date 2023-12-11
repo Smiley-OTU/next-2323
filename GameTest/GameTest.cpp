@@ -11,18 +11,27 @@
 #include "Physics.h"
 #include "Graphics.h"
 
-// TODO -- turn this into brick break with students?
-// TODO -- make an ECS? Physics is a solved problems... Now we need a video game!!!
 Entities entities;
 Physics physics;
-
-Entity* player;
-float playerWidth = 2.0f;
-float playerHeight = 1.0f;
 
 Matrix proj;
 Matrix view;
 vec2 mouse{};
+
+Entity* player;
+constexpr float PLAYER_WIDTH = 2.0f;
+constexpr float PLAYER_HEIGHT = 1.0f;
+constexpr float BALL_RADIUS = 0.5f;
+
+constexpr float LEFT = -10.0f;
+constexpr float RIGHT = 10.0f;
+constexpr float TOP = 10.0f;
+constexpr float BOTTOM = -10.0f;
+
+constexpr size_t BRICK_ROWS = 8;
+constexpr size_t BRICK_COLS = 8;
+constexpr float BRICK_WIDTH = (RIGHT - LEFT) / (BRICK_COLS + 2);
+constexpr float BRICK_HEIGHT = (TOP - BOTTOM) / (BRICK_ROWS + 4);
 
 Entity CreateWall(vec2 position, vec2 normal)
 {
@@ -40,11 +49,11 @@ Entity CreateWall(vec2 position, vec2 normal)
 	return plane;
 }
 
-Entity CreateBrick(vec2 position, float w, float h)
+Entity CreateBrick(vec2 position)
 {
 	Entity brick;
 	brick.collider.shape = AABB;
-	brick.collider.extents = { w * 0.5f, h * 0.5f };
+	brick.collider.extents = { BRICK_WIDTH * 0.5f, BRICK_HEIGHT * 0.5f };
 
 	brick.pos = position;
 	brick.gravityScale = 0.0f;
@@ -52,26 +61,25 @@ Entity CreateBrick(vec2 position, float w, float h)
 	brick.friction = 1.0f;
 	brick.restitution = 1.0f;
 
-	brick.fgColor = { 0.0f, 0.0f, 1.0f };
-	brick.bgColor = { 0.0f, 1.0f, 1.0f };
-
 	brick.tag = BRICK;
 	return brick;
 }
 
-Entity CreateBall(vec2 position, float r)
+void BallCollisionHandler(Entity& entity);
+Entity CreateBall(vec2 position)
 {
 	Entity ball;
 	ball.collider.shape = CIRCLE;
-	ball.collider.radius = r;
+	ball.collider.radius = BALL_RADIUS;
 
 	ball.pos = position;
-	ball.gravityScale = 1.0f;
+	ball.vel = { 0.0f, -10.0f };
+	ball.gravityScale = 0.0f;
 	ball.invMass = 1.0f;
 	ball.friction = 0.0f;
 	ball.restitution = 1.0f;
 
-	ball.fgColor = { 0.5f, 0.5f, 0.5f };
+	ball.onCollision = BallCollisionHandler;
 	ball.tag = BALL;
 	return ball;
 }
@@ -80,49 +88,38 @@ void Init()
 {
 	entities.reserve(1024);
 
-	// Player is always entities.front()
 	entities.push_back({});
 	player = &entities.front();
 	player->collider.shape = AABB;
-	player->collider.extents = { playerWidth * 0.5f, playerHeight * 0.5f };
+	player->collider.extents = { PLAYER_WIDTH * 0.5f, PLAYER_HEIGHT * 0.5f };
 
 	player->pos = { 0.0f, -9.0f };
 	player->invMass = 0.0f;
 	player->gravityScale = 0.0f;
 	player->tag = PLAYER;
-
-	player->bgColor = { 1.0f, 0.0f, 0.0f };
-	player->fgColor = { 0.0f, 1.0f, 0.0f };
 	
-	// Walls will never be deleted, so they come next
 	entities.push_back(CreateWall({ 0.0f, 10.0f }, { 0.0f, -1.0f }));	// top
 	entities.push_back(CreateWall({ 0.0f, -10.0f }, { 0.0f, 1.0f }));	// bottom
 	entities.push_back(CreateWall({ -10.0f, 0.0f }, { 1.0f, 0.0f }));	// left
 	entities.push_back(CreateWall({ 10.0f, 0.0f }, { -1.0f, 0.0f }));	// right
 
-	// Balls will also persist
-	entities.push_back(CreateBall({ -9.0f, 0.0f }, 0.5f));
-	entities.push_back(CreateBall({ 9.0f, 0.0f }, 0.5f));
+	entities.push_back(CreateBall({ -9.0f, 0.0f }));
+	entities.push_back(CreateBall({ 9.0f, 0.0f }));
 
-	// Finally, the bricks!
-	size_t rowCount = 8;
-	size_t colCount = 8;
-	float brickWidth = 20.0f / (colCount + 2);
-	float brickHeight = 20.0f / (rowCount + 4);
-	float x, y = -10.0f + brickHeight * 3.5f;
-	for (size_t i = 0; i < rowCount; i++)
+	float x, y = BOTTOM + BRICK_HEIGHT * 3.5f;
+	for (size_t i = 0; i < BRICK_ROWS; i++)
 	{
-		x = -10.0f + brickWidth * 1.5f;
-		for (size_t j = 0; j < colCount; j++)
+		x = LEFT + BRICK_WIDTH * 1.5f;
+		for (size_t j = 0; j < BRICK_COLS; j++)
 		{
-			entities.push_back(CreateBrick({ x, y }, brickWidth, brickHeight));
-			x += brickWidth;
+			entities.push_back(CreateBrick({ x, y }));
+			x += BRICK_WIDTH;
 		}
-		y += brickHeight;
+		y += BRICK_HEIGHT;
 	}
 	
 	glMatrixMode(GL_PROJECTION);
-	proj = Transpose(Ortho(-10.0f, 10.0f, -10.0f, 10.0f, -1.0f, 1.0f));
+	proj = Transpose(Ortho(LEFT, RIGHT, BOTTOM, TOP, -1.0f, 1.0f));
 	glMultMatrixf((float*)&proj);
 
 	glMatrixMode(GL_MODELVIEW);
@@ -147,49 +144,32 @@ void Update(float dt)
 		direction.x -= 1.0f;
 	else if (controller.GetLeftThumbStickX() > 0.5f)
 		direction.x += 1.0f;
-	if (controller.GetLeftThumbStickY() < -0.5f)
-		direction.y -= 1.0f;
-	else if (controller.GetLeftThumbStickY() > 0.5f)
-		direction.y += 1.0f;
+	//if (controller.GetLeftThumbStickY() < -0.5f)
+	//	direction.y -= 1.0f;
+	//else if (controller.GetLeftThumbStickY() > 0.5f)
+	//	direction.y += 1.0f;
 	player->vel = direction * speed;
 }
 
-//void DrawBricks()
-//{
-//	for (size_t i = 0; i < entities.size(); i++)
-//	{
-//		const Entity& p = entities[i];
-//		if (p.tag != BRICK || p.disabled) continue;
-//		DrawRect(p.pos, p.collider.extents.x * 2.0f, p.collider.extents.y * 2.0f, { 0.0f, 0.0f, 1.0f });
-//		DrawRect(p.pos, p.collider.extents.x * 2.0f, p.collider.extents.y * 2.0f, { 0.0f, 1.0f, 1.0f }, true);
-//	}
-//}
-//
-//void DrawBall()
-//{
-//
-//}
-//
-//void DrawPlayer()
-//{
-//	DrawRect(player->pos, playerWidth, playerHeight, { 1.0f, 0.0f, 0.0f }, true);
-//}
-
 void DrawEntities()
 {
-	for (size_t i = 0; i < entities.size(); i++)
+	for (const Entity& entity : entities)
 	{
-		const Entity& p = entities[i];
-		switch (p.tag)
+		if (entity.disabled) continue;
+		switch (entity.tag)
 		{
 		case BALL:
-			DrawCircle(p.pos, p.collider.radius, p.fgColor);
+			DrawCircle(entity.pos, entity.collider.radius, { 0.5f, 0.5f, 0.5f });
 			break;
 
 		case BRICK:
+			DrawRect(entity.pos, entity.collider.extents.x * 2.0f, entity.collider.extents.y * 2.0f, { 0.0f, 0.0f, 1.0f });
+			DrawRect(entity.pos, entity.collider.extents.x * 2.0f, entity.collider.extents.y * 2.0f, { 0.0f, 1.0f, 1.0f }, true);
+			break;
+
 		case PLAYER:
-			DrawRect(p.pos, p.collider.extents.x * 2.0f, p.collider.extents.y * 2.0f, p.fgColor);
-			DrawRect(p.pos, p.collider.extents.x * 2.0f, p.collider.extents.y * 2.0f, p.bgColor, true);
+			DrawRect(entity.pos, entity.collider.extents.x * 2.0f, entity.collider.extents.y * 2.0f, { 0.0f, 1.0f, 0.0f });
+			DrawRect(entity.pos, entity.collider.extents.x * 2.0f, entity.collider.extents.y * 2.0f, { 1.0f, 0.0f, 0.0f }, true);
 			break;
 		}
 	}
@@ -198,17 +178,32 @@ void DrawEntities()
 void Render()
 {
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	//physics.Render(entities);
 	DrawEntities();
 	
-	DrawRect(mouse, 1.0f, 1.0f, { 1.0f, 0.0f, 1.0f });
-	vec2 cursor = WorldToScreen({ mouse.x, mouse.y }, view, proj);
-	char buffer[64];
-	sprintf(buffer, "x: %f, y: %f", cursor.x, cursor.y);
-	DrawText({ -9.9f, 9.5f }, buffer, { 1.0f, 0.0f, 1.0f });
+	// Debug collision rendering
+	//physics.Render(entities);
+	
+	// Test screen-to-world & world-to-screen
+	//DrawRect(mouse, 1.0f, 1.0f, { 1.0f, 0.0f, 1.0f });
+	//vec2 cursor = WorldToScreen({ mouse.x, mouse.y }, view, proj);
+	//char buffer[64];
+	//sprintf(buffer, "x: %f, y: %f", cursor.x, cursor.y);
+	//DrawText({ -9.9f, 9.5f }, buffer, { 1.0f, 0.0f, 1.0f });
 }
 
 void Shutdown()
 {
 	entities.resize(0);
+}
+
+void BallCollisionHandler(Entity& entity)
+{
+	if (entity.tag == BRICK)
+	{
+		entity.disabled = true;
+	}
+	else if (entity.tag == WALL)
+	{
+
+	}
 }

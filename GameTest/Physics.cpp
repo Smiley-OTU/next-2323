@@ -13,10 +13,8 @@ void Physics::Update(float dt, Entities& entities)
 
 void Physics::Step(float dt, Entities& entities)
 {
-    for (size_t i = 0; i < entities.size(); i++)
+    for (Entity& entity : entities)
     {
-        Entity& entity = entities[i];
-
         vec2 fa = entity.force * entity.invMass;
         vec2 fg = gravity * entity.gravityScale;
         entity.acc = fa + fg;
