@@ -7,10 +7,6 @@
 
 constexpr float TWO_PI  = PI * 2.0f;
 
-// Part of Math2.h
-//constexpr float DEG2RAD = PI / 180.0f;
-//constexpr float RAD2DEG = 180.0f / PI;
-
 struct Color
 {
 	float r = 0.0f;
@@ -82,4 +78,18 @@ inline bool Overlaps(float min1, float max1, float min2, float max2)
 inline float Overlap(float min1, float max1, float min2, float max2)
 {
 	return fminf(max1, max2) - fmaxf(min1, min2);
+}
+
+// Things we use that are part of Math2 (Math2 is most likely not allowed in Ubisoft Next 2023):
+//constexpr float DEG2RAD = PI / 180.0f;
+//constexpr float RAD2DEG = 180.0f / PI;
+
+//inline float Clamp(float value, float min, float max)
+//{
+//	return (fmaxf(max, fminf(value, min)));
+//}
+
+vec2 Clamp(vec2 v, vec2 min, vec2 max)
+{
+	return { fminf(max.x, fmaxf(min.x, v.x)), fminf(max.y, fmaxf(min.y, v.y)) };
 }

@@ -33,17 +33,12 @@ inline bool CirclePlane(vec2 circle, float radius, vec2 plane, vec2 normal, vec2
 // mtv points from rect to circle
 inline bool CircleRect(vec2 circle, float radius, vec2 rect, vec2 extents, vec2* mtv = nullptr)
 {
-    vec2 nearest = {
-        Clamp(circle.x, rect.x - extents.x, rect.x + extents.x),
-        Clamp(circle.y, rect.y - extents.y, rect.y + extents.y),
-    };
-
-    vec2 normal = Normalize(circle - nearest);
-    return CirclePlane(circle, radius, nearest, normal, mtv);
+    vec2 nearest = Clamp(circle, rect - extents, rect + extents);
+    return CirclePlane(circle, radius, nearest, Normalize(circle - nearest), mtv);
 }
 
 // mtv points from rect2 to rect1
-inline bool RectRect(vec2 rect1, vec2 extents1, vec2 rect2, vec2 extents2, vec2& rect, vec2& extents, vec2* mtv = nullptr)
+inline bool RectRect(vec2 rect1, vec2 extents1, vec2 rect2, vec2 extents2, vec2* mtv = nullptr)
 {
     float xMin1 = rect1.x - extents1.x;
     float xMax1 = rect1.x + extents1.x;
@@ -62,9 +57,6 @@ inline bool RectRect(vec2 rect1, vec2 extents1, vec2 rect2, vec2 extents2, vec2&
         float xMax = fminf(xMax1, xMax2);
         float yMin = fmaxf(yMin1, yMin2);
         float yMax = fminf(yMax1, yMax2);
-
-        rect = { (xMin + xMax) * 0.5f, (yMin + yMax) * 0.5f };
-        extents = { (xMax - xMin) * 0.5f, (yMax - yMin) * 0.5f };
 
         float x = xMax - xMin;
         float y = yMax - yMin;
@@ -104,6 +96,9 @@ inline bool HitTest(vec2 pos1, vec2 pos2, Collider col1, Collider col2, vec2* mt
 
     if (col1.shape == AABB && col2.shape == CIRCLE)
         return CircleRect(pos2, col2.radius, pos1, col1.extents, mtv);
+
+    if (col1.shape == AABB && col2.shape == AABB)
+        return RectRect(pos1, col1.extents, pos2, col2.extents, mtv);
 
     return false;
 }

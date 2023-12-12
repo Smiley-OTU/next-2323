@@ -216,13 +216,12 @@ void DrawEntities()
 
 void Render()
 {
-	vec2 rect{}, extents{}, mtv{};
-	bool collision = RectRect(mouse, testExtents, testPos, testExtents, rect, extents, &mtv);
+	vec2 mtv{};
+	bool collision = RectRect(mouse, testExtents, testPos, testExtents, &mtv);
 	Color color = collision ? Color{ 1.0f, 0.0f, 0.0f } : Color{ 0.0f, 1.0f, 0.0f };
 	testPos = testPos + mtv;
 	DrawRect(mouse, testExtents.x * 2.0f, testExtents.y * 2.0f, color);
 	DrawRect(testPos, testExtents.x * 2.0f, testExtents.y * 2.0f, color);
-	DrawRect(rect, extents.x * 2.0f, extents.y * 2.0f, { 1.0f, 0.5f, 0.0f });
 
 	//switch (gameState)
 	//{
