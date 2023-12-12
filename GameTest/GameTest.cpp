@@ -20,6 +20,7 @@ Matrix proj;
 Matrix view;
 vec2 mouse{};
 
+vec2 testPos{};
 vec2 testExtents{ 3.0f, 2.0f };
 
 enum GameState
@@ -215,11 +216,13 @@ void DrawEntities()
 
 void Render()
 {
-	Color color = RectRect(mouse, testExtents, {}, testExtents) ? Color{ 1.0f, 0.0f, 0.0f } : Color{ 0.0f, 1.0f, 0.0f };
+	vec2 rect{}, extents{}, mtv{};
+	bool collision = RectRect(mouse, testExtents, testPos, testExtents, rect, extents, &mtv);
+	Color color = collision ? Color{ 1.0f, 0.0f, 0.0f } : Color{ 0.0f, 1.0f, 0.0f };
+	testPos = testPos + mtv;
 	DrawRect(mouse, testExtents.x * 2.0f, testExtents.y * 2.0f, color);
-	DrawRect({}, testExtents.x * 2.0f, testExtents.y * 2.0f, color);
-
-	//DrawRect({}, testExtents.x * 2.0f, testExtents.y * 2.0f)
+	DrawRect(testPos, testExtents.x * 2.0f, testExtents.y * 2.0f, color);
+	DrawRect(rect, extents.x * 2.0f, extents.y * 2.0f, { 1.0f, 0.5f, 0.0f });
 
 	//switch (gameState)
 	//{

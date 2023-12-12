@@ -42,7 +42,8 @@ inline bool CircleRect(vec2 circle, float radius, vec2 rect, vec2 extents, vec2*
     return CirclePlane(circle, radius, nearest, normal, mtv);
 }
 
-inline bool RectRect(vec2 rect1, vec2 extents1, vec2 rect2, vec2 extents2, vec2* mtv = nullptr)
+// mtv points from rect2 to rect1
+inline bool RectRect(vec2 rect1, vec2 extents1, vec2 rect2, vec2 extents2, vec2& rect, vec2& extents, vec2* mtv = nullptr)
 {
     float xMin1 = rect1.x - extents1.x;
     float xMax1 = rect1.x + extents1.x;
@@ -54,7 +55,37 @@ inline bool RectRect(vec2 rect1, vec2 extents1, vec2 rect2, vec2 extents2, vec2*
     float yMin2 = rect2.y - extents2.y;
     float yMax2 = rect2.y + extents2.y;
 
-    return Overlaps(xMin1, xMax1, xMin2, xMax2) && Overlaps(yMin1, yMax1, yMin2, yMax2);
+    bool collision = Overlaps(xMin1, xMax1, xMin2, xMax2) && Overlaps(yMin1, yMax1, yMin2, yMax2);
+    if (collision && mtv != nullptr)
+    {
+        float xMin = fmaxf(xMin1, xMin2);
+        float xMax = fminf(xMax1, xMax2);
+        float yMin = fmaxf(yMin1, yMin2);
+        float yMax = fminf(yMax1, yMax2);
+
+        rect = { (xMin + xMax) * 0.5f, (yMin + yMax) * 0.5f };
+        extents = { (xMax - xMin) * 0.5f, (yMax - yMin) * 0.5f };
+
+        float x = xMax - xMin;
+        float y = yMax - yMin;
+        if (x < y)
+        {
+            *mtv = { x, 0.0f };
+            if (rect1.x > xMin) mtv->x *= -1.0f;
+        }
+        else if(y < x)
+        {
+            *mtv = { 0.0f, y };
+            if (rect1.y > yMin) mtv->y *= -1.0f;
+        }
+        else
+        {
+            *mtv = { x, y };
+            if (rect1.x > xMin) mtv->x *= -1.0f;
+            if (rect1.y > yMin) mtv->y *= -1.0f;
+        }
+    }
+    return collision;
 }
 
 inline bool HitTest(vec2 pos1, vec2 pos2, Collider col1, Collider col2, vec2* mtv = nullptr)
