@@ -89,7 +89,13 @@ inline float Overlap(float min1, float max1, float min2, float max2)
 //	return (fmaxf(max, fminf(value, min)));
 //}
 
-vec2 Clamp(vec2 v, vec2 min, vec2 max)
+inline vec2 Clamp(vec2 v, vec2 min, vec2 max)
 {
 	return { fminf(max.x, fmaxf(min.x, v.x)), fminf(max.y, fmaxf(min.y, v.y)) };
 }
+
+// TODO -- make a math library that won't get my students disqualified ;)
+struct mat4
+{
+
+};
