@@ -20,14 +20,11 @@ Matrix proj;
 Matrix view;
 vec2 mouse{};
 
-vec2 testPos{};
-vec2 testExtents{ 3.0f, 2.0f };
-
 enum GameState
 {
-	PLAY,
 	TITLE,
 	INSTRUCTIONS,
+	PLAY,
 	WIN,
 	LOSS
 } gameState;
@@ -96,10 +93,8 @@ void BallCollisionHandler(Entity& ball, Entity& other);
 Entity CreateBall(vec2 position)
 {
 	Entity ball;
-	//ball.collider.shape = CIRCLE;
-	//ball.collider.radius = BALL_RADIUS;
-	ball.collider.shape = AABB;
-	ball.collider.extents = { BRICK_WIDTH * 0.25f, BRICK_HEIGHT * 0.25f };
+	ball.collider.shape = CIRCLE;
+	ball.collider.radius = BALL_RADIUS;
 
 	ball.pos = position;
 	ball.vel = { 0.0f, -10.0f };
@@ -172,9 +167,9 @@ void Update(float dt)
 	float speed = 5.0f;
 	vec2 direction = {};
 
-	if (App::IsKeyPressed(VK_LBUTTON))
+	if (App::IsKeyPressed(VK_LBUTTON) && gameState == TITLE)
 	{
-		vec2 extents = vec2{ BUTTON_WIDTH, BUTTON_HEIGHT } * 0.5f;
+		vec2 extents = vec2{ BUTTON_WIDTH, BUTTON_HEIGHT } * 0.25f;
 		if (CircleRect(mouse, 1.0f, play, extents))
 			gameState = PLAY;
 
@@ -200,8 +195,7 @@ void DrawEntities()
 		switch (entity.tag)
 		{
 		case BALL:
-			DrawRect(entity.pos, entity.collider.extents.x * 2.0f, entity.collider.extents.y * 2.0f, { 0.5f, 0.5f, 0.5f });
-			//DrawCircle(entity.pos, entity.collider.radius, { 0.5f, 0.5f, 0.5f });
+			DrawCircle(entity.pos, entity.collider.radius, { 0.5f, 0.5f, 0.5f });
 			break;
 
 		case BRICK:
