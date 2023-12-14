@@ -25,9 +25,9 @@ vec2 testExtents{ 3.0f, 2.0f };
 
 enum GameState
 {
+	PLAY,
 	TITLE,
 	INSTRUCTIONS,
-	PLAY,
 	WIN,
 	LOSS
 } gameState;
@@ -96,8 +96,10 @@ void BallCollisionHandler(Entity& ball, Entity& other);
 Entity CreateBall(vec2 position)
 {
 	Entity ball;
-	ball.collider.shape = CIRCLE;
-	ball.collider.radius = BALL_RADIUS;
+	//ball.collider.shape = CIRCLE;
+	//ball.collider.radius = BALL_RADIUS;
+	ball.collider.shape = AABB;
+	ball.collider.extents = { BRICK_WIDTH * 0.25f, BRICK_HEIGHT * 0.25f };
 
 	ball.pos = position;
 	ball.vel = { 0.0f, -10.0f };
@@ -198,7 +200,8 @@ void DrawEntities()
 		switch (entity.tag)
 		{
 		case BALL:
-			DrawCircle(entity.pos, entity.collider.radius, { 0.5f, 0.5f, 0.5f });
+			DrawRect(entity.pos, entity.collider.extents.x * 2.0f, entity.collider.extents.y * 2.0f, { 0.5f, 0.5f, 0.5f });
+			//DrawCircle(entity.pos, entity.collider.radius, { 0.5f, 0.5f, 0.5f });
 			break;
 
 		case BRICK:
@@ -216,46 +219,46 @@ void DrawEntities()
 
 void Render()
 {
-	vec2 mtv{};
-	bool collision = RectRect(mouse, testExtents, testPos, testExtents, &mtv);
-	Color color = collision ? Color{ 1.0f, 0.0f, 0.0f } : Color{ 0.0f, 1.0f, 0.0f };
-	testPos = testPos + mtv;
-	DrawRect(mouse, testExtents.x * 2.0f, testExtents.y * 2.0f, color);
-	DrawRect(testPos, testExtents.x * 2.0f, testExtents.y * 2.0f, color);
+	//vec2 mtv{};
+	//bool collision = RectRect(mouse, testExtents, testPos, testExtents, &mtv);
+	//Color color = collision ? Color{ 1.0f, 0.0f, 0.0f } : Color{ 0.0f, 1.0f, 0.0f };
+	//testPos = testPos + mtv;
+	//DrawRect(mouse, testExtents.x * 2.0f, testExtents.y * 2.0f, color);
+	//DrawRect(testPos, testExtents.x * 2.0f, testExtents.y * 2.0f, color);
 
-	//switch (gameState)
-	//{
-	//case TITLE:
-	//	glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
-	//	DrawRect(play, BUTTON_WIDTH, BUTTON_HEIGHT, { 0.0f, 1.0f, 0.0f });
-	//	DrawText(play, "PLAY");
-	//	DrawRect(instructions, BUTTON_WIDTH, BUTTON_HEIGHT, { 0.0f, 1.0f, 1.0f });
-	//	DrawText(instructions, "INSTRUCTIONS");
-	//	DrawRect(quit, BUTTON_WIDTH, BUTTON_HEIGHT, { 1.0f, 0.0f, 0.0f });
-	//	DrawText(quit, "QUIT");
-	//	break;
-	//
-	//case INSTRUCTIONS:
-	//	break;
-	//
-	//case PLAY:
-	//	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	//	DrawEntities();
-	//	char text[64];
-	//	sprintf(text, "Lives: %i", lives);
-	//	DrawText({ -9.9f, 9.5f }, text, { 1.0f, 0.0f, 0.0f });
-	//	break;
-	//
-	//case WIN:
-	//	glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
-	//	DrawText({ -9.9f, 9.5f }, "You win :)", { 0.0f, 1.0f, 1.0f });
-	//	break;
-	//
-	//case LOSS:
-	//	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	//	DrawText({ -9.9f, 9.5f }, "You lost :(", { 1.0f, 0.0f, 0.0f });
-	//	break;
-	//}
+	switch (gameState)
+	{
+	case TITLE:
+		glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+		DrawRect(play, BUTTON_WIDTH, BUTTON_HEIGHT, { 0.0f, 1.0f, 0.0f });
+		DrawText(play, "PLAY");
+		DrawRect(instructions, BUTTON_WIDTH, BUTTON_HEIGHT, { 0.0f, 1.0f, 1.0f });
+		DrawText(instructions, "INSTRUCTIONS");
+		DrawRect(quit, BUTTON_WIDTH, BUTTON_HEIGHT, { 1.0f, 0.0f, 0.0f });
+		DrawText(quit, "QUIT");
+		break;
+	
+	case INSTRUCTIONS:
+		break;
+	
+	case PLAY:
+		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+		DrawEntities();
+		char text[64];
+		sprintf(text, "Lives: %i", lives);
+		DrawText({ -9.9f, 9.5f }, text, { 1.0f, 0.0f, 0.0f });
+		break;
+	
+	case WIN:
+		glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+		DrawText({ -9.9f, 9.5f }, "You win :)", { 0.0f, 1.0f, 1.0f });
+		break;
+	
+	case LOSS:
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		DrawText({ -9.9f, 9.5f }, "You lost :(", { 1.0f, 0.0f, 0.0f });
+		break;
+	}
 }
 
 void Shutdown()
