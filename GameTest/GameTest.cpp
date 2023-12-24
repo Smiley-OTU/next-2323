@@ -57,6 +57,8 @@ vec2 play = { 0.0f, TOP * 0.5f };
 vec2 quit = { 0.0f, BOTTOM * 0.5f };
 vec2 instructions{};
 
+CSimpleSprite* testSprite;
+
 Entity CreateWall(vec2 position, vec2 normal)
 {
 	Entity plane;
@@ -110,6 +112,14 @@ Entity CreateBall(vec2 position)
 
 void Init()
 {
+	// Simply set APP_USE_VIRTUAL_RES to false and the API will render accordingly!
+	testSprite = App::CreateSprite(".\\TestData\\Test.bmp", 8, 4);
+	testSprite->CreateAnimation(0, 1.0f / 15.0f, { 0,1,2,3,4,5,6,7 });
+	testSprite->SetPosition(4.0f, 4.0f);
+	testSprite->SetScale(0.1f);
+	testSprite->SetAnimation(0);
+	testSprite->SetAngle(45.0f);
+
 	entities.reserve(1024);
 
 	entities.push_back({});
@@ -159,6 +169,7 @@ void Update(float dt)
 	float mx, my;
 	App::GetMousePos(mx, my);
 	mouse = ScreenToWorld(view, proj, { mx, my });
+	testSprite->Update(dt);
 
 	dt /= 1000.0f;
 	physics.Update(dt, entities);
@@ -253,6 +264,8 @@ void Render()
 		DrawText({ -9.9f, 9.5f }, "You lost :(", { 1.0f, 0.0f, 0.0f });
 		break;
 	}
+
+	testSprite->Draw();
 }
 
 void Shutdown()
