@@ -3,6 +3,14 @@
 #include "Math.h"
 #include <vector>
 
+constexpr float LEFT = -10.0f;
+constexpr float RIGHT = 10.0f;
+constexpr float TOP = 10.0f;
+constexpr float BOTTOM = -10.0f;
+
+constexpr float WIDTH = (RIGHT - LEFT);
+constexpr float HEIGHT = (TOP - BOTTOM);
+
 inline vec2 ScreenToWorld(Matrix view, Matrix proj, Vector2 screen)
 {
 	APP_VIRTUAL_TO_NATIVE_COORDS(screen.x, screen.y);

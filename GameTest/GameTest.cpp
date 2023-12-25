@@ -38,14 +38,6 @@ constexpr float PLAYER_HEIGHT = 1.0f;
 Entity* ball1, *ball2;
 constexpr float BALL_RADIUS = 0.5f;
 
-constexpr float LEFT = -10.0f;
-constexpr float RIGHT = 10.0f;
-constexpr float TOP = 10.0f;
-constexpr float BOTTOM = -10.0f;
-
-constexpr float WIDTH = (RIGHT - LEFT);
-constexpr float HEIGHT = (TOP - BOTTOM);
-
 constexpr size_t BRICK_ROWS = 8;
 constexpr size_t BRICK_COLS = 8;
 constexpr float BRICK_WIDTH = WIDTH / (BRICK_COLS + 2);
@@ -119,6 +111,9 @@ void Init()
 	testSprite->SetScale(0.1f);
 	testSprite->SetAnimation(0);
 	testSprite->SetAngle(45.0f);
+	// TODO -- make a "screen to clip" function that converts from screen to NDC, then scales by proj extents.
+	//vec2 dimTex{ testSprite->GetWidth(), testSprite->GetHeight() };
+	//vec2 dim = ScreenToWorld(view, proj, dimTex);
 
 	entities.reserve(1024);
 
