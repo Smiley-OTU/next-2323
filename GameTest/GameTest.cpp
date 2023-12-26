@@ -161,9 +161,7 @@ void Init()
 
 void Update(float dt)
 {
-	App::GetMousePos(mouse.x, mouse.y);
-	// TODO -- use ScreenToClip to fix mouse pos, or maybe just roll my own
-	//mouse = ScreenToWorld(mouse, view, proj);
+	mouse = Mouse();
 	testSprite->Update(dt);
 
 	dt /= 1000.0f;

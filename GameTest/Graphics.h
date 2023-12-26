@@ -40,6 +40,25 @@ inline vec2 WorldToScreen(const vec2& world, const mat4& view, const mat4& proj)
 	return { clip.x, clip.y };
 }
 
+inline vec2 Mouse()
+{
+	vec2 mouse;
+	App::GetMousePos(mouse.x, mouse.y);
+	mouse.x *= WIDTH * 0.5f;
+	mouse.y *= HEIGHT * 0.5f;
+	return mouse;
+}
+
+// View matrix is essentially an identity matrix,
+// so we probably don't need helper methods for every step of screen-to-world transformations
+//inline vec2 Mouse(mat4 proj)
+//{
+//	vec4 mouse;
+//	App::GetMousePos(mouse.x, mouse.y);
+//	mouse = Invert(proj) * mouse;
+//	return { mouse.x, mouse.y };
+//}
+
 inline void DrawCircle(vec2 pos, float radius = 0.5f, Color color = { 1.0f, 1.0f, 1.0f }, bool wireframe = false)
 {
 	glMatrixMode(GL_MODELVIEW);
