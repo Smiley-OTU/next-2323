@@ -18,22 +18,21 @@ struct Color
 	float b = 0.0f;
 };
 
-inline vec2 ScreenToWorld(Matrix view, Matrix proj, Vector2 screen)
+inline vec2 ScreenToWorld(const vec2& screen, const mat4& view, const mat4& proj)
 {
-	APP_VIRTUAL_TO_NATIVE_COORDS(screen.x, screen.y);
-	Vector4 clip{ screen.x, screen.y, 0.0f, 1.0f };
-	Matrix inv = Invert(proj * view);
-	Vector4 world = Multiply(clip, inv);
+	vec4 clip{ screen.x, screen.y, 0.0f, 1.0f };
+	APP_VIRTUAL_TO_NATIVE_COORDS(clip.x, clip.y);
+	vec4 world = Invert(proj * view) * clip;
 	world.x *= world.w;
 	world.y *= world.w;
 	world.z *= world.w;
 	return { world.x, world.y };
 }
 
-inline vec2 WorldToScreen(Vector2 world, Matrix view, Matrix proj)
+inline vec2 WorldToScreen(const vec2& world, const mat4& view, const mat4& proj)
 {
-	Vector4 clip = { world.x, world.y, 0.0f, 1.0f };
-	clip = Multiply(clip, proj * view);
+	vec4 clip = { world.x, world.y, 0.0f, 1.0f };
+	clip = proj * view * clip;
 	clip.x /= clip.w;
 	clip.y /= clip.w;
 	clip.z /= clip.w;

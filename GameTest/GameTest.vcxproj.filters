@@ -63,9 +63,6 @@
     <ClInclude Include="Graphics.h">
       <Filter>Engine</Filter>
     </ClInclude>
-    <ClInclude Include="Math2.h">
-      <Filter>Engine</Filter>
-    </ClInclude>
     <ClInclude Include="Entity.h">
       <Filter>Engine</Filter>
     </ClInclude>

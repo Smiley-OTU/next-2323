@@ -16,15 +16,15 @@
 Entities entities;
 Physics physics;
 
-Matrix proj;
-Matrix view;
+mat4 proj;
+mat4 view;
 vec2 mouse{};
 
 enum GameState
 {
+	PLAY,
 	TITLE,
 	INSTRUCTIONS,
-	PLAY,
 	WIN,
 	LOSS
 } gameState;
@@ -161,9 +161,9 @@ void Init()
 
 void Update(float dt)
 {
-	float mx, my;
-	App::GetMousePos(mx, my);
-	mouse = ScreenToWorld(view, proj, { mx, my });
+	App::GetMousePos(mouse.x, mouse.y);
+	// TODO -- use ScreenToClip to fix mouse pos, or maybe just roll my own
+	//mouse = ScreenToWorld(mouse, view, proj);
 	testSprite->Update(dt);
 
 	dt /= 1000.0f;
@@ -261,6 +261,9 @@ void Render()
 	}
 
 	testSprite->Draw();
+	char text[64];
+	sprintf(text, "%f %f\n", mouse.x, mouse.y);
+	DrawText({ -9.0f, 9.0f }, text, { 1.0f, 0.0f, 1.0f });
 }
 
 void Shutdown()

@@ -1,9 +1,8 @@
 #pragma once
 #include "App/AppSettings.h"
 #include <cmath>
-//#undef near
-//#undef far
-//#include "Math2.h"
+#undef near
+#undef far
 
 constexpr float TWO_PI  = PI * 2.0f;
 constexpr float DEG2RAD = PI / 180.0f;
@@ -37,6 +36,12 @@ struct vec2
 {
 	float x = 0.0f;
 	float y = 0.0f;
+};
+
+struct vec3 {
+	float x;
+	float y;
+	float z;
 };
 
 struct vec4 {
@@ -113,6 +118,32 @@ inline vec2 Clamp(const vec2& v, const vec2& min, const vec2& max)
 	return { fminf(max.x, fmaxf(min.x, v.x)), fminf(max.y, fmaxf(min.y, v.y)) };
 }
 
+// Matrix transpose (rotate 90 degrees)
+inline mat4 Transpose(const mat4& mat)
+{
+	mat4 result;
+
+	result.m0 = mat.m0;
+	result.m1 = mat.m4;
+	result.m2 = mat.m8;
+	result.m3 = mat.m12;
+	result.m4 = mat.m1;
+	result.m5 = mat.m5;
+	result.m6 = mat.m9;
+	result.m7 = mat.m13;
+	result.m8 = mat.m2;
+	result.m9 = mat.m6;
+	result.m10 = mat.m10;
+	result.m11 = mat.m14;
+	result.m12 = mat.m3;
+	result.m13 = mat.m7;
+	result.m14 = mat.m11;
+	result.m15 = mat.m15;
+
+	return result;
+}
+
+// Matrix inverse (opposite transformation)
 inline mat4 Invert(const mat4& mat)
 {
 	mat4 result;
@@ -159,6 +190,116 @@ inline mat4 Invert(const mat4& mat)
 	return result;
 }
 
+// View (inverse-camera) matrix
+inline mat4 LookAt(const vec3& eye, const vec3& target, const vec3& up)
+{
+	mat4 result;
+
+	float length = 0.0f;
+	float ilength = 0.0f;
+
+	// Forward-vector
+	vec3 vz = { eye.x - target.x, eye.y - target.y, eye.z - target.z };
+
+	// Forward unit-vector
+	vec3 v = vz;
+	length = sqrtf(v.x * v.x + v.y * v.y + v.z * v.z);
+	if (length == 0.0f) length = 1.0f;
+	ilength = 1.0f / length;
+	vz.x *= ilength;
+	vz.y *= ilength;
+	vz.z *= ilength;
+
+	// Right-vector
+	vec3 vx = { up.y * vz.z - up.z * vz.y, up.z * vz.x - up.x * vz.z, up.x * vz.y - up.y * vz.x };
+
+	// Right unit-vector
+	v = vx;
+	length = sqrtf(v.x * v.x + v.y * v.y + v.z * v.z);
+	if (length == 0.0f) length = 1.0f;
+	ilength = 1.0f / length;
+	vx.x *= ilength;
+	vx.y *= ilength;
+	vx.z *= ilength;
+
+	// Up-vector
+	vec3 vy = { vz.y * vx.z - vz.z * vx.y, vz.z * vx.x - vz.x * vx.z, vz.x * vx.y - vz.y * vx.x };
+
+	result.m0 = vx.x;
+	result.m1 = vy.x;
+	result.m2 = vz.x;
+	result.m3 = 0.0f;
+	result.m4 = vx.y;
+	result.m5 = vy.y;
+	result.m6 = vz.y;
+	result.m7 = 0.0f;
+	result.m8 = vx.z;
+	result.m9 = vy.z;
+	result.m10 = vz.z;
+	result.m11 = 0.0f;
+	result.m12 = -(vx.x * eye.x + vx.y * eye.y + vx.z * eye.z);   // Dot(vx, eye)
+	result.m13 = -(vy.x * eye.x + vy.y * eye.y + vy.z * eye.z);   // Dot(vy, eye)
+	result.m14 = -(vz.x * eye.x + vz.y * eye.y + vz.z * eye.z);   // Dot(vz, eye)
+	result.m15 = 1.0f;
+
+	return result;
+}
+
+// Perspective projection (3D)
+inline mat4 Perspective(double fovy/*radians*/, double aspect, double near, double far)
+{
+	mat4 result = m4identity;
+
+	double top = near * tan(fovy * 0.5);
+	double bottom = -top;
+	double right = top * aspect;
+	double left = -right;
+
+	float rl = (float)(right - left);
+	float tb = (float)(top - bottom);
+	float fn = (float)(far - near);
+
+	result.m0 = ((float)near * 2.0f) / rl;
+	result.m5 = ((float)near * 2.0f) / tb;
+	result.m8 = ((float)right + (float)left) / rl;
+	result.m9 = ((float)top + (float)bottom) / tb;
+	result.m10 = -((float)far + (float)near) / fn;
+	result.m11 = -1.0f;
+	result.m14 = -((float)far * (float)near * 2.0f) / fn;
+
+	return result;
+}
+
+// Orthographic projection (2D)
+inline mat4 Ortho(double left, double right, double bottom, double top, double near, double far)
+{
+	mat4 result;
+
+	float rl = (float)(right - left);
+	float tb = (float)(top - bottom);
+	float fn = (float)(far - near);
+
+	result.m0 = 2.0f / rl;
+	result.m1 = 0.0f;
+	result.m2 = 0.0f;
+	result.m3 = 0.0f;
+	result.m4 = 0.0f;
+	result.m5 = 2.0f / tb;
+	result.m6 = 0.0f;
+	result.m7 = 0.0f;
+	result.m8 = 0.0f;
+	result.m9 = 0.0f;
+	result.m10 = -2.0f / fn;
+	result.m11 = 0.0f;
+	result.m12 = -((float)left + (float)right) / rl;
+	result.m13 = -((float)top + (float)bottom) / tb;
+	result.m14 = -((float)far + (float)near) / fn;
+	result.m15 = 1.0f;
+
+	return result;
+}
+
+// Post-multiplication overload (pre-multiplication doesn't make sense to me)
 inline mat4 operator*(const mat4& left, const mat4& right)
 {
 	mat4 result;
@@ -183,6 +324,7 @@ inline mat4 operator*(const mat4& left, const mat4& right)
 	return result;
 }
 
+// Matrix-vector multiplication overload
 inline vec4 operator*(const mat4& m, const vec4& v)
 {
 	vec4 result;
